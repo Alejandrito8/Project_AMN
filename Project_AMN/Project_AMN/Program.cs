@@ -5,6 +5,7 @@ using Project_AMN.Client.Pages;
 using Project_AMN.Components;
 using Project_AMN.Components.Account;
 using Project_AMN.Data;
+using Project_AMN.ApiRoutes;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
@@ -35,15 +36,13 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 
-// API EXEMPEL
-// app.MapGet(pattern: "/api/articles", () => new[]
-// {
-//     new { id = 1, name = "Skruv", sku = "A-001", stock = 100, location = "A1" },
-//     new { id = 2, name = "Spik",  sku = "A-201", stock = 2300, location = "B4" }
-// });
+app.MapApiRoutes();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -56,6 +55,9 @@ else
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
+
+app.UseSwagger();       
+app.UseSwaggerUI();    
 
 app.UseHttpsRedirection();
 
