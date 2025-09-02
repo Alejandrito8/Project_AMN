@@ -272,7 +272,6 @@ __pycache__/
 
 Project_AMN/Project_AMN.Client/wwwroot/appsettings.json
 Project_AMN/Project_AMN.Client/wwwroot/appsettings.Development.json
-Project_AMN/Project_AMN.Client/Project_AMN.Client.csproj
 Project_AMN/Project_AMN/Properties/launchSettings.json
 Project_AMN/Project_AMN/appsettings.json
-Project_AMN/Project_AMN/Project_AMN.csproj
+
