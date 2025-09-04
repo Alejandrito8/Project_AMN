@@ -6,6 +6,7 @@ using Project_AMN.Components;
 using Project_AMN.Components.Account;
 using Project_AMN.Data;
 using Project_AMN.ApiRoutes;
+using Project_AMN.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
@@ -34,7 +35,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-
+builder.Services.AddScoped<IOrderService, OrderService>(); 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 builder.Services.AddEndpointsApiExplorer();

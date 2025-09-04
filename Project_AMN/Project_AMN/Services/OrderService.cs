@@ -1,31 +1,46 @@
-using Project_AMN.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Project_AMN.Data;
 using Project_AMN.Models;
+using Project_AMN.Interfaces;
 
 public class OrderService : IOrderService
 {
-    // Implementation of IInboundService methods
-    public Task CreateOrderAsync(Order order)
+    private readonly ApplicationDbContext _context;
+
+    public OrderService(ApplicationDbContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
     }
 
-    public Task DeleteOrderAsync(int id)
+    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
     {
-        throw new NotImplementedException();
+        return await _context.Orders.ToListAsync();
     }
 
-    public Task<IEnumerable<Order>> GetAllOrdersAsync()
+    public async Task<Order?> GetOrderByIdAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Orders.FindAsync(id);
     }
 
-    public Task<Order?> GetOrderByIdAsync(int id)
+    public async Task CreateOrderAsync(Order order)
     {
-        throw new NotImplementedException();
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
     }
 
-    public Task UpdateOrderAsync(Order order)
+    public async Task UpdateOrderAsync(Order order)
     {
-        throw new NotImplementedException();
+        _context.Orders.Update(order);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task DeleteOrderAsync(int id)
+    {
+        var order = await _context.Orders.FindAsync(id);
+        if (order != null)
+        {
+            _context.Orders.Remove(order);
+            await _context.SaveChangesAsync();
+        }
     }
 }
