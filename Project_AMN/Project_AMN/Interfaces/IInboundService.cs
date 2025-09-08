@@ -1,10 +1,11 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Project_AMN.Models;
 
 namespace Project_AMN.Interfaces;
-
+ 
 public interface IInboundService
 {
-    // Define methods for handling inbound operations, e.g., receiving stock, updating inventory, etc.
-}   
+    Task<IEnumerable<Article>> GetAllArticlesAsync();
+    Task<Article> GetArticleByIdAsync(int id);
+    Task AddArticleAsync(Article article);
+    Task UpdateArticleAsync(Article article);
+    Task DeleteArticleAsync(int id);
+}  

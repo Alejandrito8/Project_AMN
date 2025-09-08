@@ -1,12 +1,4 @@
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Project_AMN.Client.Pages;
-using Project_AMN.Components;
-using Project_AMN.Components.Account;
-using Project_AMN.Data;
-using Project_AMN.ApiRoutes;
-using Project_AMN.Interfaces;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
@@ -36,6 +28,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services.AddScoped<IOrderService, OrderService>(); 
+builder.Services.AddScoped<IInboundService, InboundService>(); 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 builder.Services.AddEndpointsApiExplorer();
