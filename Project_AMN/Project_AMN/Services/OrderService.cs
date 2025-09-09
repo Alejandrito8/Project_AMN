@@ -14,6 +14,7 @@ public class OrderService : IOrderService
 
     public async Task<IEnumerable<Order>> GetAllOrdersAsync()
     {
+        
         return await _context.Orders.ToListAsync();
     }
 
