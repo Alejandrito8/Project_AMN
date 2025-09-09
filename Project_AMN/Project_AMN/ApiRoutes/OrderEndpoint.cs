@@ -1,24 +1,43 @@
 
+
 namespace Project_AMN.ApiRoutes;
 
-public static class OrderEndpoint
+public static class OrderEndpoints
 {
-    public static IEndpointRouteBuilder MapOrderEndpoint(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapOrderEndpoints(this IEndpointRouteBuilder app)
     {
-        endpoints.MapGet(pattern: "/api/orders", () => new[]
+        app.MapGet("/api/orders", async (IOrderService service) =>
         {
-            //Test data
-            new { id = 1, name = "Skruv", sku = "A-001", stock = 100, location = "A1" },
-            new { id = 2, name = "Spik",  sku = "A-201", stock = 2300, location = "B4" }
-        }).WithName("GetArticles")
-            .WithTags("Articles")
-            .WithMetadata(new Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute())
-            .Produces(statusCode: StatusCodes.Status200OK)
-            .Produces(statusCode: StatusCodes.Status401Unauthorized)
-            .Produces(statusCode: StatusCodes.Status403Forbidden);
-        return endpoints;
-    }
-    
-    // OBS, detta är bara en exempelroute, ta bort denna fil när ni skapar era egna routes
+            var orders = await service.GetAllOrdersAsync();
+            return Results.Ok(orders);
+        });
 
-}               
+        app.MapGet("/api/orders/{id:int}", async (int id, IOrderService service) =>
+        {
+            var order = await service.GetOrderByIdAsync(id);
+            return order is null ? Results.NotFound() : Results.Ok(order);
+        });
+
+        app.MapPost("/api/orders", async (OrderCreateDto dto, IOrderService service) =>
+        {
+            var created = await service.CreateOrderAsync(dto);
+            return Results.Created($"/api/orders/{created.OrderId}", created);
+        });
+
+        app.MapPut("/api/orders/{id:int}/status", async (int id, OrderUpdateStatusDto dto, IOrderService service) =>
+        {
+            if (id != dto.OrderId) return Results.BadRequest("Mismatched order ID");
+
+            var updated = await service.UpdateOrderStatusAsync(dto);
+            return updated is null ? Results.NotFound() : Results.Ok(updated);
+        });
+
+        app.MapDelete("/api/orders/{id:int}", async (int id, IOrderService service) =>
+        {
+            await service.DeleteOrderAsync(id);
+            return Results.NoContent();
+        });
+
+        return app;
+    }
+}

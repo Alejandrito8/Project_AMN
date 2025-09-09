@@ -34,8 +34,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-
-app.MapApiRoutes();
+app.MapOrderEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
