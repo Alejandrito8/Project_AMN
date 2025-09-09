@@ -1,7 +1,3 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Project_AMN.Models;
-
 namespace Project_AMN.Interfaces;
 
 public interface IArticleService

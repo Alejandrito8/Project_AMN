@@ -1,47 +1,73 @@
-namespace Project_AMN.Services;
-
-/// <summary>
-///  
-/// </summary>
-public class InboundService : IInboundService
+namespace Project_AMN.Services
 {
-    // Constants
-    private const string PlaceHolder = null;
-    private const string PlaceHolder1 = null;
-
-    private const int PlaceHolder2 = 2;
-
-    private readonly ApplicationDbContext _context;
-
-
     /// <summary>
-    /// 
+    /// Service class to handle incoming operations related to articles.
+    /// Implement CRUD functionality (Create, Read, Update, Delete).
     /// </summary>
-    /// <param name="article"></param>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public Task AddArticleAsync(Article article)
+    public class InboundService : IInboundService
     {
-        throw new NotImplementedException();
-    }
+        private readonly ApplicationDbContext _context;
 
-    public Task DeleteArticleAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+        /// <summary>
+        /// Initializes a new instance of InboundService with the database context.        
+        /// </summary>
+        /// <param name="context">Entity Frameworks database context.</param>
+        public InboundService(ApplicationDbContext context)
+        {
+            _context = context;
+        }
 
-    public Task<IEnumerable<Article>> GetAllArticlesAsync()
-    {
-        throw new NotImplementedException();
-    }
+        /// <summary>
+        /// Add a ny article to the database.
+        /// </summary>
+        /// <param name="article">The article to add.</param>
+        public async Task AddArticleAsync(Article article)
+        {
+            _context.Articles.Add(article);
+            await _context.SaveChangesAsync();
+        }
 
-    public Task<Article> GetArticleByIdAsync(int id)
-    {
-        throw new NotImplementedException();
-    }
+        /// <summary>
+        /// Removes an article from the database based on its ID.
+        /// </summary>
+        /// <param name="id">ID of the article to delete.</param>
+        public async Task DeleteArticleAsync(int id)
+        {
+            var article = await _context.Articles.FindAsync(id);
+            if (article != null)
+            {
+                _context.Articles.Remove(article);
+                await _context.SaveChangesAsync();
+            }
+        }
 
-    public Task UpdateArticleAsync(Article article)
-    {
-        throw new NotImplementedException();
+        /// <summary>
+        /// Retrieves all articles from the database.
+        /// </summary>
+        /// <returns>A list of all articles.</returns>
+        public async Task<IEnumerable<Article>> GetAllArticlesAsync()
+        {
+            return await _context.Articles.ToListAsync();
+        }
+
+        /// <summary>
+        /// Retrieves an article from the database based on its ID.
+        /// </summary>
+        /// <param name="id">ID of the article to retrieve.</param>
+        /// <returns>The article if found, otherwise null.</returns>
+        public async Task<Article?> GetArticleByIdAsync(int id)
+        {
+            return await _context.Articles.FindAsync(id);
+        }
+
+        /// <summary>
+        /// Updates an existing article in the database.
+        /// </summary>
+        /// <param name="article">The article with updated values.</param>
+        public async Task UpdateArticleAsync(Article article)
+        {
+            _context.Articles.Update(article);
+            await _context.SaveChangesAsync();   
+        }
     }
-}  
+}
