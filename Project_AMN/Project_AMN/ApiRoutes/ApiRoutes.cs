@@ -1,4 +1,3 @@
-
 namespace Project_AMN.ApiRoutes;
 
 public static class ApiRoutes

@@ -1,5 +1,4 @@
-using Project_AMN.Interfaces;
-using Project_AMN.Models;
+namespace Project_AMN.Services;
 
 public class ArticleService : IArticleService
 {

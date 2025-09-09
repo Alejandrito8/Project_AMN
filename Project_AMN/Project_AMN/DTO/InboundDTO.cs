@@ -1,10 +1,37 @@
-// Skickar med data som ska till användarna
+namespace Project_AMN.DTO
+{
+    /// <summary>
+    /// Data Transfer Object (DTO) for creating a new inbound record.
+    /// Used when the client sends data to create a new article/order.
+    /// </summary>
+    public class InboundCreateDto
+    {
+        public string Name { get; set; } = string.Empty;
+        public string SKU { get; set; } = string.Empty;
+        public int Stock { get; set; }
+        public string Location { get; set; } = string.Empty;
+    }
 
-/*DTO (OrderCreateDto, OrderResultDto) → vad klienten får skicka in/få ut
+    /// <summary>
+    /// Data Transfer Object (DTO) for updating the status of an inbound order.
+    /// Used when the client updates an order’s status.
+    /// </summary>
+    public class InboundUpdateStatusDto
+    {
+        public int OrderId { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
 
- På så sätt kan du:
- Skydda känsliga fält
- Hindra fusk/injektioner
- Ha stabila API-kontrakt även om databasen ändras*/
-
-
+    /// <summary>
+    /// Data Transfer Object (DTO) for returning inbound data to the client.
+    /// Used when sending results back to the user.
+    /// </summary>
+    public class InboundResultDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string SKU { get; set; } = string.Empty;
+        public int Stock { get; set; }
+        public string Location { get; set; } = string.Empty;
+    }
+}
