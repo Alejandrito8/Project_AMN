@@ -63,7 +63,7 @@ namespace Project_AMN.Services
         /// <summary>
         /// Updates an existing article in the database.
         /// </summary>
-        /// <param name="article">The article with updated values.</param>
+        /// <param name="article">The updated article entity.</param>
         public async Task UpdateArticleAsync(Article article)
         {
             _context.Articles.Update(article);
