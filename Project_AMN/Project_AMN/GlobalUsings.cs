@@ -4,7 +4,6 @@
 /// 
 
 global using Project_AMN.ApiRoutes;
-global using Project_AMN.Components.Pages;
 global using Project_AMN.Components;
 global using Project_AMN.Components.Account;
 global using Project_AMN.Data;
