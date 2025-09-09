@@ -1,4 +1,4 @@
-namespace Project_AMN.DTOs;
+namespace Project_AMN.DTO;
 
 public class OrderCreateDto
 {
