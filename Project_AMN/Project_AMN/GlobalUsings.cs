@@ -12,6 +12,8 @@ global using Project_AMN.DTO;
 global using Project_AMN.Interfaces;
 global using Project_AMN.Models;
 global using Project_AMN.Services;
+global using Project_AMN.Handler;
+global using Project_AMN.Commands;
 
 global using Microsoft.AspNetCore.Components.Authorization;
 global using Microsoft.AspNetCore.Identity;
@@ -23,5 +25,5 @@ global using System.Threading.Tasks;
 
 global using MediatR;
 
-global using Project_AMN.Commands;
+  
 

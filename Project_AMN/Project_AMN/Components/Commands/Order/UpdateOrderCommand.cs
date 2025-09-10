@@ -3,7 +3,7 @@ using MediatR;
 namespace Project_AMN.Commands;
 
 public record UpdateOrderStatusCommand(
-    int OrderId,
-    string Status
+    int OrderId
 ) : IRequest<OrderResultDto>;
+
 

@@ -1,7 +1,10 @@
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
 
-
+// Registrera MediatR och alla handlers i assemblyn
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly));
+    
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
@@ -27,7 +30,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddSingleton<IOrderService, OrderService>(); 
+builder.Services.AddScoped<IOrderService, OrderService>(); 
 builder.Services.AddScoped<IInboundService, InboundService>(); 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 

@@ -65,12 +65,13 @@ public class OrderService : IOrderService
         };
     }
 
-    public async Task<OrderResultDto?> UpdateOrderStatusAsync(OrderUpdateStatusDto dto)
+    public async Task<OrderResultDto?> UpdateOrderStatusAsync(int orderId)
     {
-        var order = await _context.Orders.FindAsync(dto.OrderId);
-        if (order == null) return null;
 
-        order.Status = dto.Status;
+        if (orderId == null) return null;
+
+        var order = await _context.Orders.FindAsync(orderId);
+        order.Status = "Sent";
         await _context.SaveChangesAsync();
 
         return new OrderResultDto
@@ -84,13 +85,21 @@ public class OrderService : IOrderService
         };
     }
 
-    public async Task DeleteOrderAsync(int id)
+public async Task<bool> DeleteOrderAsync(int orderId)
+{
+    var order = await _context.Orders.FindAsync(orderId);
+
+    if (order == null)
     {
-        var order = await _context.Orders.FindAsync(id);
-        if (order != null)
-        {
-            _context.Orders.Remove(order);
-            await _context.SaveChangesAsync();
-        }
+        Console.WriteLine($"Hittade ingen order med ID {orderId}");
+        return false;
     }
+
+    Console.WriteLine($"Hittade order {order.OrderId}, raderar nu...");
+    _context.Orders.Remove(order);
+    await _context.SaveChangesAsync();
+    return true;
+}
+
+
 }
