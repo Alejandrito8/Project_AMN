@@ -5,6 +5,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+    
+
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -25,7 +27,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddScoped<IOrderService, OrderService>(); 
+builder.Services.AddSingleton<IOrderService, OrderService>(); 
 builder.Services.AddScoped<IInboundService, InboundService>(); 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
@@ -35,6 +37,7 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 app.MapOrderEndpoints();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

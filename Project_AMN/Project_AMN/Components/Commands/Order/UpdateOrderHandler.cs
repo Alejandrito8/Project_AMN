@@ -1,9 +1,9 @@
-namespace Project_AMN.Commands;
-public class UpdateOrderStatusCommand
+namespace Project_AMN.Handler;
+public class UpdateOrderStatusHandler
 {
     private readonly IOrderService _orderService;
 
-    public UpdateOrderStatusCommand(IOrderService orderService)
+    public UpdateOrderStatusHandler(IOrderService orderService)
     {
         _orderService = orderService;
     }
