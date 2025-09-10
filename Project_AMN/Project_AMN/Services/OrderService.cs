@@ -1,3 +1,4 @@
+
 namespace Project_AMN.Services;
 
 public class OrderService : IOrderService
@@ -9,27 +10,78 @@ public class OrderService : IOrderService
         _context = context;
     }
 
-    public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+    public async Task<IEnumerable<OrderResultDto?>> GetAllOrdersAsync()
     {
-        
-        return await _context.Orders.ToListAsync();
+        return await _context.Orders
+            .Select(o => new OrderResultDto
+            {
+                OrderId = o.OrderId,
+                CreatedAt = o.CreatedAt,
+                Status = o.Status,
+                TotalAmount = o.TotalAmount,
+                ShippingAddress = o.ShippingAddress,
+                TrackingNumber = o.TrackingNumber
+            })
+            .ToListAsync();
     }
 
-    public async Task<Order?> GetOrderByIdAsync(int id)
+    public async Task<OrderResultDto?> GetOrderByIdAsync(int id)
     {
-        return await _context.Orders.FindAsync(id);
+        return await _context.Orders
+            .Where(o => o.OrderId == id)
+            .Select(o => new OrderResultDto
+            {
+                OrderId = o.OrderId,
+                CreatedAt = o.CreatedAt,
+                Status = o.Status,
+                TotalAmount = o.TotalAmount,
+                ShippingAddress = o.ShippingAddress,
+                TrackingNumber = o.TrackingNumber
+            })
+            .FirstOrDefaultAsync();
     }
 
-    public async Task CreateOrderAsync(Order order)
+    public async Task<OrderResultDto> CreateOrderAsync(OrderCreateDto dto)
     {
+        var order = new Order
+        {
+            CreatedAt = DateTime.UtcNow,
+            Status = "Created",  //OM VI ORKAR LÄGGER VI TILL EN TIMER SOM ÄNDRA STATUS EFTER ETT TAG
+            TotalAmount = dto.TotalAmount,
+            ShippingAddress = dto.ShippingAddress
+        };
+
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
+
+        return new OrderResultDto
+        {
+            OrderId = order.OrderId,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            TotalAmount = order.TotalAmount,
+            ShippingAddress = order.ShippingAddress,
+            TrackingNumber = order.TrackingNumber
+        };
     }
 
-    public async Task UpdateOrderAsync(Order order)
+    public async Task<OrderResultDto?> UpdateOrderStatusAsync(OrderUpdateStatusDto dto)
     {
-        _context.Orders.Update(order);
+        var order = await _context.Orders.FindAsync(dto.OrderId);
+        if (order == null) return null;
+
+        order.Status = dto.Status;
         await _context.SaveChangesAsync();
+
+        return new OrderResultDto
+        {
+            OrderId = order.OrderId,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            TotalAmount = order.TotalAmount,
+            ShippingAddress = order.ShippingAddress,
+            TrackingNumber = order.TrackingNumber
+        };
     }
 
     public async Task DeleteOrderAsync(int id)

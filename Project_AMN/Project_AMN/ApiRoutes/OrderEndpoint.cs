@@ -1,24 +1,41 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore;
+using Project_AMN.Commands;
 
 namespace Project_AMN.ApiRoutes;
 
-public static class OrderEndpoint
+public static class OrderEndpoints
 {
-    public static IEndpointRouteBuilder MapOrderEndpoint(this IEndpointRouteBuilder endpoints)
+    public static IEndpointRouteBuilder MapOrderEndpoints(this IEndpointRouteBuilder app)
     {
-        endpoints.MapGet(pattern: "/api/orders", () => new[]
-        {
-            //Test data
-            new { id = 1, name = "Skruv", sku = "A-001", stock = 100, location = "A1" },
-            new { id = 2, name = "Spik",  sku = "A-201", stock = 2300, location = "B4" }
-        }).WithName("GetArticles")
-            .WithTags("Articles")
-            .WithMetadata(new Microsoft.AspNetCore.Authorization.AllowAnonymousAttribute())
-            .Produces(statusCode: StatusCodes.Status200OK)
-            .Produces(statusCode: StatusCodes.Status401Unauthorized)
-            .Produces(statusCode: StatusCodes.Status403Forbidden);
-        return endpoints;
-    }
-    
-    // OBS, detta är bara en exempelroute, ta bort denna fil när ni skapar era egna routes
+        // // GET - hämta alla orders via Mediator
+        // app.MapGet("/api/orders", async (IMediator mediator, ListOrderCommand command) =>
+        // {
+        //     var orders = await mediator.Send(command);
+        //     return orders is null ? Results.NotFound("No orders found.") : Results.Ok(orders);
+        // });
 
-}               
+        // POST
+        app.MapPost("/api/orders/{id:int}", async (CreateOrderCommand orderCommand, IMediator mediator) =>
+        {
+            var order = await mediator.Send(orderCommand);
+            return order is null ? Results.NotFound() : Results.Ok(order);
+        });
+
+        // // PUT
+        // app.MapPut("/api/orders/{id:int}/status", async (UpdateOrderStatusCommand orderCommand, IMediator mediator) =>
+        // {
+        //     var updated = await mediator.Send(orderCommand);
+        //     return updated is null ? Results.NotFound() : Results.Ok(updated);
+        // });
+
+        // // DELETE
+        // app.MapDelete("/api/orders/{id:int}", async ( DeleteOrderCommand orderCommand, IMediator mediator) =>
+        // {
+        //     await mediator.Send(orderCommand);
+        //     return Results.NoContent();
+        // });
+
+        return app;
+    }
+}
