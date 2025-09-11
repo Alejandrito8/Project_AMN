@@ -9,7 +9,7 @@ public class OrderCreateDto
 public class OrderUpdateStatusDto
 {
     public int OrderId { get; set; }
-    public string Status { get; set; } = string.Empty; // ex. "Sent", "Delivered"
+    public string Status { get; set; } = "Created"; // ex. "Sent", "Delivered"
 }
 
 public class OrderResultDto
