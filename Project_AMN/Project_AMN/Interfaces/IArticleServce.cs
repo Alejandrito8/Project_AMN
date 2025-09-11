@@ -1,34 +1,36 @@
 namespace Project_AMN.Interfaces;
-
+ 
 /// <summary>
 /// Defines service methods for managing articles.
-/// Provides CRUD operations (Create, Read, Update, Delete).
+/// Provides CRUD operations (Create, Read, Update, Delete) using DTOs.
 /// </summary>
 public interface IArticleService
 {
     /// <summary>
-    /// Retrieves all articles from the database.
+    /// Retrieves all articles.
     /// </summary>
-    /// <returns>A collection of all articles.</returns>
-    Task<IEnumerable<Article>> GetAllArticlesAsync();
-
+    Task<IEnumerable<ArticleResultDto?>> GetAllArticlesAsync();
+ 
     /// <summary>
-    /// Retrieves an article by its ID.
+    /// Retrieves a specific article by its ID.
     /// </summary>
-    Task<Article?> GetArticleByIdAsync(int id);
-
+    Task<ArticleResultDto?> GetArticleByIdAsync(int id);
+ 
     /// <summary>
-    /// Adds a new article to the database. 
+    /// Adds a new article.
+    /// Returns the created article as a DTO.
     /// </summary>
-    Task AddArticleAsync(Article article);
-
+    Task<ArticleResultDto?> AddArticleAsync(ArticleCreateDto dto);
+ 
     /// <summary>
-    /// Updates an existing article in the database.
+    /// Updates an existing article.
+    /// Returns the updated article as a DTO, or null if not found.
     /// </summary>
-    Task UpdateArticleAsync(Article article);
-
+    Task<ArticleResultDto?> UpdateArticleAsync(ArticleUpdateDto dto);
+ 
     /// <summary>
-    /// Deletes an article from the database by its ID.
+    /// Deletes an article by ID.
+    /// Returns true if deleted, false if not found.
     /// </summary>
     Task DeleteArticleAsync(int id);
 }
