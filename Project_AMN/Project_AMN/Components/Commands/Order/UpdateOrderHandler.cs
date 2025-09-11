@@ -1,5 +1,6 @@
+
 namespace Project_AMN.Handler;
-public class UpdateOrderStatusHandler
+public class UpdateOrderStatusHandler : IRequestHandler<UpdateOrderStatusCommand, OrderResultDto>
 {
     private readonly IOrderService _orderService;
 
@@ -8,8 +9,9 @@ public class UpdateOrderStatusHandler
         _orderService = orderService;
     }
 
-    public async Task<OrderResultDto?> ExecuteAsync(OrderUpdateStatusDto dto)
+    public async Task<OrderResultDto> Handle(UpdateOrderStatusCommand request, CancellationToken cancellationToken)
     {
-        return await _orderService.UpdateOrderStatusAsync(dto);
+        var result = await _orderService.UpdateOrderStatusAsync(request.OrderId);
+        return result;
     }
 }
