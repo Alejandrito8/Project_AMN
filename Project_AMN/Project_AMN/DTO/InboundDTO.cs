@@ -6,8 +6,8 @@ namespace Project_AMN.DTO
     /// </summary>
     public class InboundCreateDto
     {
-        public string Name { get; set; } = string.Empty;
-        public string SKU { get; set; } = string.Empty;
+        public string Name { get; set; } 
+        public string SKU { get; set; } = string.Empty; //Fixa unikt SKU
         public int Stock { get; set; }
         public string Location { get; set; } = string.Empty;
     }
@@ -16,10 +16,10 @@ namespace Project_AMN.DTO
     /// Data Transfer Object (DTO) for updating the status of an inbound order.
     /// Used when the client updates an order’s status.
     /// </summary>
-    public class InboundUpdateStatusDto
+    public class InboundUpdateDto
     {
-        public int OrderId { get; set; }
-        public string Status { get; set; } = string.Empty;
+        public string SKU { get; set; } = string.Empty;
+        public int Stock { get; set; }
     }
 
     /// <summary>
@@ -28,10 +28,11 @@ namespace Project_AMN.DTO
     /// </summary>
     public class InboundResultDto
     {
-        public int Id { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string SKU { get; set; } = string.Empty;
-        public int Stock { get; set; }
-        public string Location { get; set; } = string.Empty;
+    public int Id { get; set; }
+    public string Name { get; set; }
+    public string SKU { get; set; } = string.Empty;
+    public int Stock { get; set; }
+    public decimal Price { get; set; } 
+    public string Location { get; set; } = string.Empty;
     }
 }
