@@ -7,7 +7,7 @@ namespace Project_AMN.Services
     public class ArticleService : IArticleService
     {
         private readonly ApplicationDbContext _context;
- 
+
         /// <summary>
         /// Initializes a new instance of Articleservice with the database context.        
         /// </summary>
@@ -16,48 +16,55 @@ namespace Project_AMN.Services
         {
             _context = context;
         }
- 
+
         /// <summary>
         /// Adds a new article to the database.
         /// </summary>
         /// <param name="article">The article entity to add.</param>
-        public async Task<ArticleResultDto?> AddArticleAsync(ArticleCreateDto dto)
+        public async Task<ArticleResultDto?> CreateArticleAsync(ArticleCreateDto dto)
         {
             var article = new Article
             {
                 Name = dto.Name,
                 SKU = dto.SKU,
                 Stock = dto.Stock,
+                Price = dto.Price,
                 Location = dto.Location
             };
- 
+
             _context.Articles.Add(article);
             await _context.SaveChangesAsync();
-           
+
             return new ArticleResultDto
             {
                 Id = article.Id,
                 Name = article.Name,
                 SKU = article.SKU,
                 Stock = article.Stock,
+                Price = article.Price,
                 Location = article.Location
             };
         }
- 
+
         /// <summary>
         /// Removes an article from the database based on its ID.
         /// </summary>
         /// <param name="id">ID of the article to delete.</param>
-        public async Task DeleteArticleAsync(int id)
+        public async Task<bool> DeleteArticleAsync(int id)
         {
             var article = await _context.Articles.FindAsync(id);
-            if (article != null)
+            if (article == null)
             {
-                _context.Articles.Remove(article);
-                await _context.SaveChangesAsync();
+                Console.WriteLine($"Found no articel with ID {id}");
+                return false;
             }
+            Console.WriteLine($"Found articel {article.Id}, deleting it now...");
+            _context.Articles.Remove(article);
+            await _context.SaveChangesAsync();
+            return true;
         }
- 
+
+
         /// <summary>
         /// Retrieves all articles from the database.
         /// </summary>
@@ -71,11 +78,12 @@ namespace Project_AMN.Services
                 Name = a.Name,
                 SKU = a.SKU,
                 Stock = a.Stock,
+                Price = a.Price,
                 Location = a.Location
             })
             .ToListAsync();
         }
- 
+
         /// <summary>
         /// Retrieves an article from the database based on its ID.
         /// </summary>
@@ -91,21 +99,24 @@ namespace Project_AMN.Services
                 Name = a.Name,
                 SKU = a.SKU,
                 Stock = a.Stock,
+                Price = a.Price,
                 Location = a.Location
             })
             .FirstOrDefaultAsync();
         }
- 
+
         /// <summary>
         /// Updates an existing article in the database.
         /// </summary>
         /// <param name="article">The updated article entity.</param>
-        public async Task<ArticleResultDto?> UpdateArticleAsync(ArticleUpdateDto dto)
+        public async Task<ArticleResultDto?> UpdateArticleAsync(ArticleUpdateDto dto, string sku)
         {
-            var article = await _context.Articles.FindAsync(dto.Id);
+            var article = await _context.Articles
+                .FirstOrDefaultAsync(a => a.SKU == sku);
+
             if (article == null) return null;
-            // article.Name = dto.Name; ska vi kunna ändra namn på artikeln?
-            article.Stock = dto.Stock;
+
+            article.Name = dto.Name;
             article.Location = dto.Location;
             _context.Articles.Update(article);
             await _context.SaveChangesAsync();
@@ -115,8 +126,11 @@ namespace Project_AMN.Services
                 Name = article.Name,
                 SKU = article.SKU,
                 Stock = article.Stock,
+                Price = article.Price,
                 Location = article.Location
             };
         }
+
+
     }
 }
