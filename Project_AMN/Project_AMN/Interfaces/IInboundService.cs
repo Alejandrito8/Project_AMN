@@ -29,7 +29,7 @@ public interface IInboundService
     /// <summary>
     /// Deletes an article from the database by its ID.
     /// </summary>
-    Task DeleteArticleAsync(int id);
+    Task<bool> DeleteArticleAsync(int id);
 }  
 
 

@@ -9,6 +9,7 @@ namespace Project_AMN.DTO
         public string Name { get; set; } = string.Empty;
         public string SKU { get; set; } = string.Empty;
         public int Stock { get; set; }
+         public decimal Price { get; set; } 
         public string Location { get; set; } = string.Empty;
     }
 
@@ -18,10 +19,7 @@ namespace Project_AMN.DTO
     /// </summary>
     public class ArticleUpdateDto
     {
-        public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-        public string SKU { get; set; } = string.Empty;
-        public int Stock { get; set; }
         public string Location { get; set; } = string.Empty;
     }
 
@@ -35,6 +33,7 @@ namespace Project_AMN.DTO
         public string Name { get; set; } = string.Empty;
         public string SKU { get; set; } = string.Empty;
         public int Stock { get; set; }
+        public decimal Price { get; set; } 
         public string Location { get; set; } = string.Empty;
     }
 }

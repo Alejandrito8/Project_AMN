@@ -50,14 +50,19 @@ namespace Project_AMN.Services
             return await _context.Articles.ToListAsync();
         }
 
+        public Task<Article> GetArticleByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Retrieves an article from the database based on its ID.
         /// </summary>
         /// <param name="id">ID of the article to retrieve.</param>
         /// <returns>The article if found, otherwise null.</returns>
-        public async Task<Article?> GetArticleByIdAsync(int id)
+        Task<bool> IInboundService.DeleteArticleAsync(int id)
         {
-            return await _context.Articles.FindAsync(id);
+            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -69,5 +74,7 @@ namespace Project_AMN.Services
             _context.Articles.Update(article);
             await _context.SaveChangesAsync();   
         }
+
+
     }
 }

@@ -2,9 +2,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpClient();
 
 // Registrera MediatR och alla handlers i assemblyn
-builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly));
-    
+
+    builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(CreateArticleHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(UpdateArticleHandler).Assembly);
+});
+
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
@@ -30,8 +35,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddScoped<IOrderService, OrderService>(); 
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInboundService, InboundService>(); 
+builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -39,7 +45,7 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-app.MapOrderEndpoints();
+
 
 
 // Configure the HTTP request pipeline.
@@ -58,12 +64,16 @@ app.UseSwagger();
 app.UseSwaggerUI();    
 
 app.UseHttpsRedirection();
-
 app.UseStaticFiles();
-app.UseAntiforgery();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseAntiforgery();
+
+app.MapOrderEndpoints();
+// app.MapInboundEndpoints();
+app.MapArticleEndpoints();
 
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
