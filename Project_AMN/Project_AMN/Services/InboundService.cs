@@ -1,8 +1,7 @@
 namespace Project_AMN.Services
 {
     /// <summary>
-    /// Service class to handle incoming operations related to articles.
-    /// Implement CRUD functionality (Create, Read, Update, Delete).
+    /// Service class to handle inbounds of articles.
     /// </summary>
     public class InboundService : IInboundService
     {
@@ -18,63 +17,21 @@ namespace Project_AMN.Services
         }
 
         /// <summary>
-        /// Add a ny article to the database.
+        /// Register a inbound of an article.
         /// </summary>
-        /// <param name="article">The article to add.</param>
-        public async Task AddArticleAsync(Article article)
+        /// <param name="sku">Articel SKU.</param>
+        /// <param name="quantity">Amount of Inbounds.</param>
+        public async Task<bool> RegisterInboundAsync(string sku, int quantity)
         {
-            _context.Articles.Add(article);
+            var article = await _context.Articles.FirstOrDefaultAsync(a => a.SKU == sku);
+            if (article == null) return false;
+
+            article.Stock += quantity;
             await _context.SaveChangesAsync();
+            return true;
         }
-
-        /// <summary>
-        /// Removes an article from the database based on its ID.
-        /// </summary>
-        /// <param name="id">ID of the article to delete.</param>
-        public async Task DeleteArticleAsync(int id)
-        {
-            var article = await _context.Articles.FindAsync(id);
-            if (article != null)
-            {
-                _context.Articles.Remove(article);
-                await _context.SaveChangesAsync();
-            }
-        }
-
-        /// <summary>
-        /// Retrieves all articles from the database.
-        /// </summary>
-        /// <returns>A list of all articles.</returns>
-        public async Task<IEnumerable<Article>> GetAllArticlesAsync()
-        {
-            return await _context.Articles.ToListAsync();
-        }
-
-        public Task<Article> GetArticleByIdAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Retrieves an article from the database based on its ID.
-        /// </summary>
-        /// <param name="id">ID of the article to retrieve.</param>
-        /// <returns>The article if found, otherwise null.</returns>
-        Task<bool> IInboundService.DeleteArticleAsync(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Updates an existing article in the database.
-        /// </summary>
-        /// <param name="article">The updated article entity.</param>
-        public async Task UpdateArticleAsync(Article article)
-        {
-            _context.Articles.Update(article);
-            await _context.SaveChangesAsync();   
-        }
-
 
     }
 }
+
+    
