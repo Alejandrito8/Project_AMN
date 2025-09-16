@@ -1,36 +1,18 @@
 namespace Project_AMN.Interfaces;
 
 /// <summary>
-/// Defines service methods for managing articles.
-/// Provides CRUD operations (Create, Read, Update, Delete).
+/// Defines service methods for managing article inbounds.
 /// </summary>
 public interface IInboundService
 {
     /// <summary>
-    /// Retrieves all articles from the database.
+    /// Registers an inbound shipment for a specific article by SKU and quantity.
+    /// Returns true if successful, false if the article is not found.
     /// </summary>
-    Task<IEnumerable<Article>> GetAllArticlesAsync();
-
-    /// <summary>
-    /// Retrieves a specific article by its ID.
-    /// </summary>
-    Task<Article> GetArticleByIdAsync(int id);
-
-    /// <summary>
-    /// Adds a new article to the database.
-    /// </summary>
-    Task AddArticleAsync(Article article);
-
-    /// <summary>
-    /// Updates an existing article in the database.
-    /// </summary>
-    Task UpdateArticleAsync(Article article);
-
-    /// <summary>
-    /// Deletes an article from the database by its ID.
-    /// </summary>
-    Task<bool> DeleteArticleAsync(int id);
+    Task<bool> RegisterInboundAsync(string sku, int quantity);
+    
 }  
+
 
 
 

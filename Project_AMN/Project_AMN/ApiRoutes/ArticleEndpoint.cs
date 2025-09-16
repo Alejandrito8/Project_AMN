@@ -21,18 +21,18 @@ public static class ArticleEndpoints
         });
 
         // PUT
-app.MapPut("/api/articles/{sku}", async (
-    string sku,
-    ArticleUpdateDto dto,
-    IMediator mediator) =>
-{
-    var command = new UpdateArticleCommand(sku, dto); 
-    var updated = await mediator.Send(command);
+        app.MapPut("/api/articles/{sku}", async (
+            string sku,
+            ArticleUpdateDto dto,
+            IMediator mediator) =>
+        {
+            var command = new UpdateArticleCommand(sku, dto);
+            var updated = await mediator.Send(command);
 
-    return updated is null 
-        ? Results.NotFound($"Article with SKU {sku} not found.") 
-        : Results.Ok(updated);
-});
+            return updated is null
+                ? Results.NotFound($"Article with SKU {sku} not found.")
+                : Results.Ok(updated);
+        });
 
 
         // DELETE
