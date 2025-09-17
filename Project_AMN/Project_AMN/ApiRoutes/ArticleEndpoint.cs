@@ -1,5 +1,3 @@
-using Project_AMN.Commands;
-
 namespace Project_AMN.ApiRoutes;
 
 public static class ArticleEndpoints
@@ -44,6 +42,15 @@ public static class ArticleEndpoints
                 : Results.NotFound($"Article with ID {Id} not found.");
         });
 
+        app.MapGet("/articles/export", async (HttpResponse response, ApplicationDbContext db) =>
+        {
+            var articles = await db.Articles.ToListAsync();
+            var fileBytes = ExportService.ExportArticles(articles);
+
+            response.ContentType = "text/csv";
+            response.Headers.Add("Content-Disposition", "attachment; filename=articles.csv");
+            await response.Body.WriteAsync(fileBytes);
+        });
 
         return app;
     }

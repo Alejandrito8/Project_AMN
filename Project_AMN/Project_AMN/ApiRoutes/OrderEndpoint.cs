@@ -1,5 +1,3 @@
-using Project_AMN.Commands;
-
 namespace Project_AMN.ApiRoutes;
 
 public static class OrderEndpoints
@@ -38,6 +36,16 @@ public static class OrderEndpoints
             return deleted
                 ? Results.NoContent()
                 : Results.NotFound($"Order with ID {orderId} not found.");
+        });
+
+        app.MapGet("/orders/export", async (HttpResponse response, ApplicationDbContext db) =>
+        {
+            var orders = await db.Orders.ToListAsync();
+            var fileBytes = ExportService.ExportOrders(orders);
+
+            response.ContentType = "text/csv";
+            response.Headers.Add("Content-Disposition", "attachment; filename=orders.csv");
+            await response.Body.WriteAsync(fileBytes);
         });
 
 

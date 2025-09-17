@@ -6,11 +6,28 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Project_AMN.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreate : Migration
+    public partial class newcommit : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Articles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    SKU = table.Column<string>(type: "TEXT", nullable: false),
+                    Stock = table.Column<int>(type: "INTEGER", nullable: false),
+                    Price = table.Column<decimal>(type: "TEXT", nullable: false),
+                    Location = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Articles", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -214,6 +231,9 @@ namespace Project_AMN.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "Articles");
+
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
