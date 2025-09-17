@@ -15,7 +15,6 @@ public interface IArticleService
     /// Retrieves a specific article by its ID.
     /// </summary>
     Task<ArticleResultDto?> GetArticleByIdAsync(int id);
-    //Task<ArticleResultDto?> GetArticleBySkuAsync(string sku);
 
     /// <summary>
     /// Adds a new article.
@@ -34,5 +33,4 @@ public interface IArticleService
     /// Returns true if deleted, false if not found.
     /// </summary>
     Task<bool> DeleteArticleAsync(int id);
-   
 }

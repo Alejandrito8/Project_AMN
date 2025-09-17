@@ -1,3 +1,5 @@
+namespace Project_AMN.Models;
+
 public class Article
 {
     public int Id { get; set; }
