@@ -1,7 +1,3 @@
-using System;
-using Project_AMN.Data;
-using Project_AMN.Models;
-using Microsoft.EntityFrameworkCore;
 namespace Project_AMN.Models;
 
 public class Order

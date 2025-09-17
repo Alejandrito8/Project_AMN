@@ -1,4 +1,3 @@
-
 namespace Project_AMN.Services;
 
 public class OrderService : IOrderService
@@ -10,7 +9,7 @@ public class OrderService : IOrderService
         _context = context;
     }
 
-    public async Task<IEnumerable<OrderResultDto?>> GetAllOrdersAsync()
+     public async Task<IEnumerable<OrderResultDto?>> GetAllOrdersAsync(/*string name = null;*/)
     {
         return await _context.Orders
             .Select(o => new OrderResultDto
@@ -91,11 +90,10 @@ public async Task<bool> DeleteOrderAsync(int orderId)
 
     if (order == null)
     {
-        Console.WriteLine($"Hittade ingen order med ID {orderId}");
+        Console.WriteLine($"Found no order wiith ID {orderId}");
         return false;
     }
-
-    Console.WriteLine($"Hittade order {order.OrderId}, raderar nu...");
+    Console.WriteLine($"Found order {order.OrderId}, deleting it now...");
     _context.Orders.Remove(order);
     await _context.SaveChangesAsync();
     return true;
