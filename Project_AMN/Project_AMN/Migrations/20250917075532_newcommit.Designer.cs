@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Project_AMN.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250916122151_InitialCreate1")]
-    partial class InitialCreate1
+    [Migration("20250917075532_newcommit")]
+    partial class newcommit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -223,6 +223,9 @@ namespace Project_AMN.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SKU")
