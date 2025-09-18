@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Project_AMN.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250918182302_User")]
-    partial class User
+    [Migration("20250918195102_InitialCommit")]
+    partial class InitialCommit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

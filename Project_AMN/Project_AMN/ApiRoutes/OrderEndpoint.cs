@@ -7,7 +7,7 @@ public static class OrderEndpoints
         // // GET 
         app.MapGet("/api/orders", async (IMediator mediator) =>
         {
-            var orders = await mediator.Send(new ListOrderCommand());
+            var orders = await mediator.Send(new ListOrderQuery());
             return orders.Any() ? Results.Ok(orders) : Results.NotFound("No orders found.");
         });
 

@@ -7,7 +7,7 @@ public static class ArticleEndpoints
         // // GET 
         app.MapGet("/api/articles", async (IMediator mediator) =>
         {
-            var articles = await mediator.Send(new ListArticleCommand());
+            var articles = await mediator.Send(new ListArticleQuery());
             return articles.Any() ? Results.Ok(articles) : Results.NotFound("No articles found.");
         });
 

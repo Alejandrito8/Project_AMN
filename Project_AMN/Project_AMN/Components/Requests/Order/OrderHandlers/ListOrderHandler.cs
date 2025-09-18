@@ -1,7 +1,7 @@
 
 namespace Project_AMN.Handler;
 
-public class ListOrderHandler : IRequestHandler<ListOrderCommand, IEnumerable<OrderResultDto>>
+public class ListOrderHandler : IRequestHandler<ListOrderQuery, IEnumerable<OrderResultDto>>
 {
     private readonly IOrderService _orderService;
 
@@ -10,7 +10,7 @@ public class ListOrderHandler : IRequestHandler<ListOrderCommand, IEnumerable<Or
         _orderService = orderService;
     }
 
-    public async Task<IEnumerable<OrderResultDto>> Handle(ListOrderCommand request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<OrderResultDto>> Handle(ListOrderQuery request, CancellationToken cancellationToken)
     {
         return await _orderService.GetAllOrdersAsync();
     }

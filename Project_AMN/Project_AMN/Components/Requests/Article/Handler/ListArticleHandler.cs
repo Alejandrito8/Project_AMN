@@ -1,7 +1,7 @@
 
 namespace Project_AMN.Handler;
 
-public class ListArticleHandler : IRequestHandler<ListArticleCommand, IEnumerable<ArticleResultDto>>
+public class ListArticleHandler : IRequestHandler<ListArticleQuery, IEnumerable<ArticleResultDto>>
 {
     private readonly IArticleService _articleService;
 
@@ -9,7 +9,7 @@ public class ListArticleHandler : IRequestHandler<ListArticleCommand, IEnumerabl
     {
         _articleService = articleService;
     }
-    public async Task<IEnumerable<ArticleResultDto>> Handle(ListArticleCommand request, CancellationToken cancellationToken)
+    public async Task<IEnumerable<ArticleResultDto>> Handle(ListArticleQuery request, CancellationToken cancellationToken)
     {
         return await _articleService.GetAllArticlesAsync();
     }
