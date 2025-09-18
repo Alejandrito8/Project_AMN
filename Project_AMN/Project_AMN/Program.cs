@@ -59,19 +59,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddAuthorization(options =>
-{
-    foreach (var role in RoleDefinitions.RolePermission.Keys)
-    {
-        options.AddPolicy($"{role}Policy", policy => policy.RequireRole(role));
-    }
-});
-
 var app = builder.Build();
-
-
-
-
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -115,23 +103,29 @@ await InitializeRolesAndAdmin(app);
 
 app.Run();
 
-// --- Metoden för att initiera roller och admin ---
+
 async Task InitializeRolesAndAdmin(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-
-    foreach (var role in RoleDefinitions.RolePermission.Keys)
+ 
+    var roles = new[] { "Admin", "User" };
+    foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
-
+ 
     string email = "admin@admin.se";
     string password = "Abc123!";
-
+ 
+    if (await userManager.FindByEmailAsync(email) == null)
+    {
+        var user = new ApplicationUser { UserName = email, Email = email };
+        await userManager.CreateAsync(user, password);
+        await userManager.AddToRoleAsync(user, "Admin");
+    }
 }
