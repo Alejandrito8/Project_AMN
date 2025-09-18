@@ -13,6 +13,7 @@ global using Project_AMN.Models;
 global using Project_AMN.Services;
 global using Project_AMN.Handler;
 global using Project_AMN.Commands;
+global using Project_AMN.Queries;
 
 global using Microsoft.AspNetCore.Components.Authorization;
 global using Microsoft.AspNetCore.Identity;
@@ -29,3 +30,5 @@ global using Utilities;
 global using System.Text;
 
 global using System;
+
+global using Microsoft.AspNetCore.Mvc;
