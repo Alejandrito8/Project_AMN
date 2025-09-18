@@ -7,4 +7,8 @@ public interface IOrderService
     Task<OrderResultDto> CreateOrderAsync(OrderCreateDto dto);
     Task<OrderResultDto?> UpdateOrderStatusAsync(int orderId);
     Task<bool> DeleteOrderAsync(int OrderId);
+    Task<IEnumerable<OrderResultDto>> SearchOrdersAsync(string? status, DateTime? fromDate, DateTime? toDate);
 }
+
+
+

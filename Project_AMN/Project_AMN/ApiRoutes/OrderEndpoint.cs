@@ -48,7 +48,19 @@ public static class OrderEndpoints
             await response.Body.WriteAsync(fileBytes);
         });
 
+        app.MapGet("/api/orders/search", async (
+            [AsParameters] OrderSearchRequest request,
+            IOrderService service) =>
+        {
+            var results = await service.SearchOrdersAsync(request.Status, request.FromDate, request.ToDate);
 
+            if (!results.Any())
+                return Results.NotFound("No matching orders found.");
+            return Results.Ok(results);
+        });
         return app;
+
+
+
     }
 }

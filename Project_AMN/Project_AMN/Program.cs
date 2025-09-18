@@ -1,3 +1,5 @@
+using Project_AMN.Handlers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // HttpClient
@@ -6,9 +8,11 @@ builder.Services.AddHttpClient();
 // MediatR
 builder.Services.AddMediatR(cfg =>
 {
+
     cfg.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(CreateArticleHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(UpdateArticleHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
 });
 
 // Blazor Components
@@ -20,7 +24,14 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
-builder.Services.AddAuthorization();
+
+// Only allow Admins to access certain endpoints
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
+});
 
 // Full Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -42,14 +53,27 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInboundService, InboundService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthorization(options =>
+{
+    foreach (var role in RoleDefinitions.RolePermission.Keys)
+    {
+        options.AddPolicy($"{role}Policy", policy => policy.RequireRole(role));
+    }
+});
+
 var app = builder.Build();
 
-// HTTP pipeline
+
+
+
+
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -75,6 +99,7 @@ app.UseAntiforgery();
 app.MapOrderEndpoints();
 app.MapInboundEndpoints();
 app.MapArticleEndpoints();
+app.MapAdminEndpoints();
 
 // Razor Components
 app.MapRazorComponents<App>()
@@ -97,8 +122,8 @@ async Task InitializeRolesAndAdmin(WebApplication app)
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    var roles = new[] { "Admin", "User" };
-    foreach (var role in roles)
+
+    foreach (var role in RoleDefinitions.RolePermission.Keys)
     {
         if (!await roleManager.RoleExistsAsync(role))
         {
@@ -109,10 +134,4 @@ async Task InitializeRolesAndAdmin(WebApplication app)
     string email = "admin@admin.se";
     string password = "Abc123!";
 
-    if (await userManager.FindByEmailAsync(email) == null)
-    {
-        var user = new ApplicationUser { UserName = email, Email = email };
-        await userManager.CreateAsync(user, password);
-        await userManager.AddToRoleAsync(user, "Admin");
-    }
 }

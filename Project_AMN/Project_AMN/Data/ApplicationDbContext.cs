@@ -2,6 +2,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
 {
      public DbSet<Order> Orders { get; set; }
     public DbSet<Article> Articles{ get; set; }
+    // New DbSet for UserActivity
+    
+
 
     protected override void OnModelCreating(ModelBuilder builder)
         {

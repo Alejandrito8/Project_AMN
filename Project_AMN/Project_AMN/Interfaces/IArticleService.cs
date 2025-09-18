@@ -33,4 +33,6 @@ public interface IArticleService
     /// Returns true if deleted, false if not found.
     /// </summary>
     Task<bool> DeleteArticleAsync(int id);
-}
+
+    Task<IEnumerable<ArticleResultDto>> SearchArticlesAsync(QueryFilter filter);
+};

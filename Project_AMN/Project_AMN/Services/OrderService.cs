@@ -9,7 +9,7 @@ public class OrderService : IOrderService
         _context = context;
     }
 
-     public async Task<IEnumerable<OrderResultDto?>> GetAllOrdersAsync(/*string name = null;*/)
+    public async Task<IEnumerable<OrderResultDto?>> GetAllOrdersAsync(/*string name = null;*/)
     {
         return await _context.Orders
             .Select(o => new OrderResultDto
@@ -84,20 +84,50 @@ public class OrderService : IOrderService
         };
     }
 
-public async Task<bool> DeleteOrderAsync(int orderId)
-{
-    var order = await _context.Orders.FindAsync(orderId);
-
-    if (order == null)
+    public async Task<bool> DeleteOrderAsync(int orderId)
     {
-        Console.WriteLine($"Found no order wiith ID {orderId}");
-        return false;
+        var order = await _context.Orders.FindAsync(orderId);
+
+        if (order == null)
+        {
+            Console.WriteLine($"Found no order wiith ID {orderId}");
+            return false;
+        }
+        Console.WriteLine($"Found order {order.OrderId}, deleting it now...");
+        _context.Orders.Remove(order);
+        await _context.SaveChangesAsync();
+        return true;
     }
-    Console.WriteLine($"Found order {order.OrderId}, deleting it now...");
-    _context.Orders.Remove(order);
-    await _context.SaveChangesAsync();
-    return true;
+
+    // Method for searching with filters.
+    public async Task<IEnumerable<OrderResultDto>> SearchOrdersAsync(string? status, DateTime? fromDate, DateTime? toDate)
+    {
+        var query = _context.Orders.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            var normalizedStatus = status.Trim().ToLower();
+            query = query.Where(o => o.Status.ToLower().Contains(normalizedStatus));
+        }
+
+        if (fromDate.HasValue)
+            query = query.Where(o => o.CreatedAt >= fromDate.Value);
+
+        if (toDate.HasValue)
+            query = query.Where(o => o.CreatedAt <= toDate.Value);
+
+        return await query
+            .Select(o => new OrderResultDto
+            {
+                OrderId = o.OrderId,
+                CreatedAt = o.CreatedAt,
+                Status = o.Status,
+                TotalAmount = o.TotalAmount,
+                ShippingAddress = o.ShippingAddress,
+                TrackingNumber = o.TrackingNumber
+            })
+        .ToListAsync();
+    }
+
 }
 
-
-}
