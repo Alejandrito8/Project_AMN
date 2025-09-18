@@ -49,3 +49,86 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.container-padding {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    text-align: center;
+}
+
+.gray-rects {
+    display: flex;
+    flex-direction: row;   
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 3rem;
+    flex-wrap: wrap;       
+}
+
+.gray-rect {
+    background-color: #f0f0f0;
+    flex: 1 1 30%;     
+    min-width: 250px;     
+    height: 28rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.article-placeholder,
+.order-placeholder {
+    width: 60%;           
+    height: 32rem;       
+    background-color: #f0f0f0; 
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.nav-scrollable .nav-link,
+.nav-scrollable .nav-link.active,
+.nav-scrollable .nav-link:hover {
+    color: white !important;
+    font-size: 1rem !important;
+    text-decoration: none !important;
+    background: transparent !important;
+}
+
+.nav-scrollable .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.nav-scrollable .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.top-row {
+    background: linear-gradient(#000, #444) !important;
+}
+
+.nav-scrollable {
+    background: linear-gradient(#222, #555) !important;
+}
+
+.nav-link {
+    color: #000 !important; 
+    background-color: transparent !important;
+    border-radius: 4px;
+}
+
+.nav-link:hover {
+    background-color: #e0e0e0 !important; 
+    color: #000 !important;
+}
+
+.nav-link.active {
+    background-color: #000 !important; 
+    color: #fff !important;         
+}
+

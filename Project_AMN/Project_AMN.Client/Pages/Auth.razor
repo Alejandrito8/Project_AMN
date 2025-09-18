@@ -4,10 +4,146 @@
 
 @attribute [Authorize]
 
-<PageTitle>Auth</PageTitle>
-
-<h1>You are authenticated</h1>
+<PageTitle>Admin Panel</PageTitle>
+<h1>Admin Panel</h1>
 
 <AuthorizeView>
-    Hello @context.User.Identity?.Name!
+    <h3>
+        Welcome @context.User.Identity?.Name<br /></h3>
+        <h5>You are now authenticated!</h5>
 </AuthorizeView>
+
+        <br><h4>Create New User</h4>
+        <div class="mb-4 border p-4 rounded shadow">
+            <input placeholder="First Name" @bind="newUser.FirstName" class="border p-1 mr-2 mb-2" />
+            <input placeholder="Last Name" @bind="newUser.LastName" class="border p-1 mr-2 mb-2" />
+            <input placeholder="Email" @bind="newUser.Email" class="border p-1 mr-2 mb-2" />
+            <input type="password" placeholder="Password" @bind="newUser.Password" class="border p-1 mr-2 mb-2" />
+            <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="border p-1 mr-2 mb-2" />
+            <select @bind="newUser.Role" class="border p-1 mr-2 mb-2">
+                <option value="Admin">Admin</option>
+                <option value="User">User</option>
+                <option value="Manager">Manager</option>
+            </select>
+            <button class="bg-blue-500 text-black p-1 rounded" @onclick="CreateUser">@GetCreateButtonText()</button>
+        </div>
+
+        <h4>Existing Users</h4>
+        <table class="border-collapse border border-gray-300 w-full mb-4">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-1">Name</th>
+                    <th class="border p-1">Email</th>
+                    <th class="border p-1">Role</th>
+                    <th class="border p-1">Status</th>
+                    <th class="border p-1">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td class="border p-1">@user.FirstName @user.LastName</td>
+                        <td class="border p-1">@user.Email</td>
+                        <td class="border p-1">@user.Role</td>
+                        <td class="border p-1">@user.Status</td>
+                        <td class="border p-1">
+                            <button class="bg-yellow-500 text-white p-1 mr-1 rounded" @onclick="() => EditUser(user)">Edit</button>
+                            <button class="bg-red-500 text-white p-1 mr-1 rounded" @onclick="() => ResetPassword(user)">Reset Password</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (editingUser != null)
+        {
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+                <div class="bg-white p-4 rounded shadow w-1/3">
+                    <h4>Edit User</h4>
+                    <input placeholder="First Name" @bind="editingUser.FirstName" class="border p-1 mr-2 mb-2 w-full" />
+                    <input placeholder="Last Name" @bind="editingUser.LastName" class="border p-1 mr-2 mb-2 w-full" />
+                    <input placeholder="Email" @bind="editingUser.Email" class="border p-1 mr-2 mb-2 w-full" />
+                    <select @bind="editingUser.Role" class="border p-1 mr-2 mb-2 w-full">
+                        <option value="Admin">Admin</option>
+                        <option value="User">User</option>
+                        <option value="Manager">Manager</option>
+                    </select>
+                    <select @bind="editingUser.Status" class="border p-1 mr-2 mb-2 w-full">
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                    <div class="flex justify-end">
+                        <button class="bg-gray-500 text-white p-1 mr-2 rounded" @onclick="CancelEdit">Cancel</button>
+                        <button class="bg-green-500 text-white p-1 rounded" @onclick="SaveEdit">Save</button>
+                    </div>
+                </div>
+            </div>
+        }
+@code {
+    private List<User> users = new();
+    private User newUser = new User { Role = "Admin" };
+    private User? editingUser;
+    private string confirmPassword = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        // API call to load users
+    }
+
+    private async Task CreateUser()
+    {
+        if (newUser.Password != confirmPassword) return;
+        // API call to create user
+        newUser = new User { Role = "Admin" };
+        confirmPassword = "";
+        await LoadUsers();
+    }
+
+    private void EditUser(User user)
+    {
+        editingUser = new User
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Role = user.Role,
+            Status = user.Status
+        };
+    }
+
+    private void CancelEdit() => editingUser = null;
+
+    private async Task SaveEdit()
+    {
+        if (editingUser == null) return;
+        // API call to update user
+        editingUser = null;
+        await LoadUsers();
+    }
+
+    private async Task ResetPassword(User user)
+    {
+        // API call to reset password
+    }
+
+    private string GetCreateButtonText()
+    {
+        return string.IsNullOrWhiteSpace(newUser.Role) ? "Create User" : $"Create {newUser.Role}";
+    }
+
+    public class User
+    {
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string Role { get; set; } = "Admin";
+        public string Status { get; set; } = "Active";
+    }
+}
