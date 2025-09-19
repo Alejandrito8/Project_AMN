@@ -5,21 +5,28 @@
         <NavMenu />
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" class="top-link">About</a>
+    <div class="main-container">
+        <main>
+            <div class="top-row px-4">
+                <a href="https://learn.microsoft.com/aspnet/core/" target="_blank" class="top-link">About</a>
 
             <form class="search-form">
                 <input class="search-input" type="search" placeholder="Search" />
                 <button class="search-button" type="submit">Search</button>
             </form>
-        </div>
 
+            </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+            <article class="content px-4">
+                @Body
+            </article>
+        </main>
+
+        <footer class="footer">
+            <p>© 2025 Marketplace AB</p>
+        </footer>
+
+    </div>
 </div>
 
 <div id="blazor-error-ui">
