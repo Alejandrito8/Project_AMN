@@ -110,9 +110,18 @@ main {
     text-decoration: underline;
 }
 
-.search-form {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+.search-button {
+    background-color: #fff; 
+    color: #000;        
+    border: 2px solid #000;  
+    border-radius: 4px;      
+    padding: 0.25rem 0.75rem; 
+    font-size: 0.9rem;        
+    cursor: pointer;
+    transition: 0.2s;
 }
 
+.search-button:hover {
+    background-color: #000;  
+    color: #fff;   
+}

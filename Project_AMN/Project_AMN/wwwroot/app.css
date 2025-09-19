@@ -132,3 +132,33 @@ h1:focus {
     color: #fff !important;         
 }
 
+.page {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #333;
+    color: white;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+main {
+    flex: 1;
+}
+
+.footer {
+    background-color: #555;
+    color: white;
+    text-align: center;
+    height: 40px;       
+    line-height: 40px; 
+    width: 100%;
+}
+

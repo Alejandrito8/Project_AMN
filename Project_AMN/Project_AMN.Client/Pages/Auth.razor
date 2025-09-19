@@ -1,19 +1,22 @@
-﻿@page "/auth"
+﻿@page "/adminpanel"
 
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [Authorize]
 
 <PageTitle>Admin Panel</PageTitle>
-<h1>Admin Panel</h1>
+<h1 class="text-center">Admin Panel</h1>
 
 <AuthorizeView>
-    <h3>
-        Welcome @context.User.Identity?.Name<br /></h3>
-        <h5>You are now authenticated!</h5>
+    <div class="text-center">
+        <h3>Welcome @context.User.Identity?.Name | You are now authenticated!</h3>
+        <h10><i>As an admin, you have access to create profiles for new employees and grant permissions.</i></h10>
+        <br/>
+        <hr class="border-t border-gray-300 my-4" />
+    </div>
 </AuthorizeView>
 
-        <br><h4>Create New User</h4>
+        <h4>Create New User</h4>
         <div class="mb-4 border p-4 rounded shadow">
             <input placeholder="First Name" @bind="newUser.FirstName" class="border p-1 mr-2 mb-2" />
             <input placeholder="Last Name" @bind="newUser.LastName" class="border p-1 mr-2 mb-2" />
@@ -23,38 +26,37 @@
             <select @bind="newUser.Role" class="border p-1 mr-2 mb-2">
                 <option value="Admin">Admin</option>
                 <option value="User">User</option>
-                <option value="Manager">Manager</option>
+                <option value="Employee">Employee</option>
             </select>
             <button class="bg-blue-500 text-black p-1 rounded" @onclick="CreateUser">@GetCreateButtonText()</button>
         </div>
 
+        <hr class="border-t border-gray-300 my-4" />
         <h4>Existing Users</h4>
-        <table class="border-collapse border border-gray-300 w-full mb-4">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="border p-1">Name</th>
-                    <th class="border p-1">Email</th>
-                    <th class="border p-1">Role</th>
-                    <th class="border p-1">Status</th>
-                    <th class="border p-1">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
+        <div class="space-y-4">
+            @if (users.Count == 0)
+            {
+                <p class="text-gray-500 italic">No users found. Add a new user above to see them here.</p>
+            }
+            else
+            {
                 @foreach (var user in users)
                 {
-                    <tr>
-                        <td class="border p-1">@user.FirstName @user.LastName</td>
-                        <td class="border p-1">@user.Email</td>
-                        <td class="border p-1">@user.Role</td>
-                        <td class="border p-1">@user.Status</td>
-                        <td class="border p-1">
-                            <button class="bg-yellow-500 text-white p-1 mr-1 rounded" @onclick="() => EditUser(user)">Edit</button>
-                            <button class="bg-red-500 text-white p-1 mr-1 rounded" @onclick="() => ResetPassword(user)">Reset Password</button>
-                        </td>
-                    </tr>
+                    <div class="border rounded p-4 shadow flex justify-between items-center">
+                        <div>
+                            <p><strong>Name:</strong> @user.FirstName @user.LastName</p>
+                            <p><strong>Email:</strong> @user.Email</p>
+                            <p><strong>Role:</strong> @user.Role</p>
+                            <p><strong>Status:</strong> @user.Status</p>
+                        </div>
+                        <div class="flex flex-col space-y-2">
+                            <button class="bg-yellow-500 text-white p-2 rounded" @onclick="() => EditUser(user)">Edit</button>
+                            <button class="bg-red-500 text-white p-2 rounded" @onclick="() => ResetPassword(user)">Reset Password</button>
+                        </div>
+                    </div>
                 }
-            </tbody>
-        </table>
+            }
+        </div>
 
         @if (editingUser != null)
         {
@@ -67,7 +69,7 @@
                     <select @bind="editingUser.Role" class="border p-1 mr-2 mb-2 w-full">
                         <option value="Admin">Admin</option>
                         <option value="User">User</option>
-                        <option value="Manager">Manager</option>
+                        <option value="Manager">Employee</option>
                     </select>
                     <select @bind="editingUser.Status" class="border p-1 mr-2 mb-2 w-full">
                         <option value="Active">Active</option>
@@ -147,3 +149,33 @@
         public string Status { get; set; } = "Active";
     }
 }
+
+
+
+        @* <h4>Existing Users</h4>
+        <table class="border-collapse border border-gray-300 w-full mb-4">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border p-1">Name</th>
+                    <th class="border p-1">Email</th>
+                    <th class="border p-1">Role</th>
+                    <th class="border p-1">Status</th>
+                    <th class="border p-1">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr>
+                        <td class="border p-1">@user.FirstName @user.LastName</td>
+                        <td class="border p-1">@user.Email</td>
+                        <td class="border p-1">@user.Role</td>
+                        <td class="border p-1">@user.Status</td>
+                        <td class="border p-1">
+                            <button class="bg-yellow-500 text-white p-1 mr-1 rounded" @onclick="() => EditUser(user)">Edit</button>
+                            <button class="bg-red-500 text-white p-1 mr-1 rounded" @onclick="() => ResetPassword(user)">Reset Password</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table> *@
