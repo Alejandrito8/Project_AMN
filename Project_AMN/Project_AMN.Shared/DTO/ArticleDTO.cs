@@ -1,4 +1,4 @@
-namespace Project_AMN.DTO
+namespace Project_AMN.Shared.DTO
 {
     /// <summary>
     /// Data Transfer Object (DTO) for creating a new article.

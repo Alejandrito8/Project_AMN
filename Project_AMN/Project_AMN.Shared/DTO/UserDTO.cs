@@ -1,6 +1,6 @@
-using System.Runtime.CompilerServices;
 
-namespace Project_AMN.DTO;
+
+namespace Project_AMN.Shared.DTO;
 
 public class CreateUserDto
 {
