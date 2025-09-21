@@ -1,0 +1,16 @@
+@page "/admin"
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Admin </PageTitle>
+<h1 class="text-center">Admin </h1>
+
+<AuthorizeView>
+    <div class="text-center">
+        <h3>Welcome @context.User.Identity?.Name | You are now authenticated!</h3>
+        <h10><i>As an admin, you have access to create profiles for new employees and grant permissions.</i></h10>
+        <br/>
+        <hr class="border-t border-gray-300 my-4" />
+    </div>
+</AuthorizeView>

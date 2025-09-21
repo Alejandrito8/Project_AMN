@@ -7,9 +7,7 @@ global using Project_AMN.ApiRoutes;
 global using Project_AMN.Components;
 global using Project_AMN.Components.Account;
 global using Project_AMN.Data;
-global using Project_AMN.DTO;
 global using Project_AMN.Interfaces;
-global using Project_AMN.Models;
 global using Project_AMN.Services;
 global using Project_AMN.Handler;
 global using Project_AMN.Commands;
@@ -32,3 +30,6 @@ global using System.Text;
 global using System;
 
 global using Microsoft.AspNetCore.Mvc;
+
+global using Project_AMN.Shared.DTO;
+global using Project_AMN.Shared.Models;

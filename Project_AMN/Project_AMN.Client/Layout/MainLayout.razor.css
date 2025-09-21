@@ -94,3 +94,34 @@ main {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.top-row {
+    display: flex;
+    align-items: center;
+}
+
+.top-row a {
+    color: white !important;
+    text-decoration: none;
+    margin-right: 2rem; 
+}
+
+.top-row a:hover {
+    text-decoration: underline;
+}
+
+.search-button {
+    background-color: #fff; 
+    color: #000;        
+    border: 2px solid #000;  
+    border-radius: 4px;      
+    padding: 0.25rem 0.75rem; 
+    font-size: 0.9rem;        
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.search-button:hover {
+    background-color: #000;  
+    color: #fff;   
+}

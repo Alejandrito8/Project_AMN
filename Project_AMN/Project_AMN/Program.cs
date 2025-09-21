@@ -8,11 +8,11 @@ builder.Services.AddHttpClient();
 // MediatR
 builder.Services.AddMediatR(cfg =>
 {
-
     cfg.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(CreateArticleHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(UpdateArticleHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
 });
 
 // Blazor Components
@@ -58,6 +58,8 @@ builder.Services.AddScoped<IUserService, UserService>();
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 

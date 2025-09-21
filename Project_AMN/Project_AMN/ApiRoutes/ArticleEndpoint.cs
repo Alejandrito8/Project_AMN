@@ -4,21 +4,26 @@ public static class ArticleEndpoints
 {
     public static IEndpointRouteBuilder MapArticleEndpoints(this IEndpointRouteBuilder app)
     {
-        // // GET 
+
         app.MapGet("/api/articles", async (IMediator mediator) =>
         {
-            var articles = await mediator.Send(new ListArticleCommand());
+            var articles = await mediator.Send(new ListArticleQuery());
             return articles.Any() ? Results.Ok(articles) : Results.NotFound("No articles found.");
         });
 
-        // POST
+        // app.MapGet("/api/articles/{id:int}", async (int id, IMediator mediator) =>
+        // {
+        //     var article = await mediator.Send(new GetArticleByIdQuery(id));
+        //     return article is null ? Results.NotFound($"Article with ID {id} not found.") : Results.Ok(article);
+        // });
+        
         app.MapPost("/api/articles", async (CreateArticleCommand articleCommand, IMediator mediator) =>
         {
             var article = await mediator.Send(articleCommand);
             return article is null ? Results.NotFound() : Results.Ok(article);
         });
 
-        // PUT
+
         app.MapPut("/api/articles/{sku}", async (
             string sku,
             ArticleUpdateDto dto,
@@ -32,8 +37,6 @@ public static class ArticleEndpoints
                 : Results.Ok(updated);
         });
 
-
-        // DELETE
         app.MapDelete("/api/articles/{id:int}", async (int Id, IMediator mediator) =>
         {
             var deleted = await mediator.Send(new DeleteArticleCommand(Id));

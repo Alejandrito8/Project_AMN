@@ -216,7 +216,7 @@ namespace Project_AMN.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Project_AMN.Models.Article", b =>
+            modelBuilder.Entity("Project_AMN.Shared.Models.Article", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -245,7 +245,7 @@ namespace Project_AMN.Migrations
                     b.ToTable("Articles");
                 });
 
-            modelBuilder.Entity("Project_AMN.Models.Order", b =>
+            modelBuilder.Entity("Project_AMN.Shared.Models.Order", b =>
                 {
                     b.Property<int>("OrderId")
                         .ValueGeneratedOnAdd()
