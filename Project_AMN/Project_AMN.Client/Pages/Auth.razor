@@ -1,6 +1,10 @@
 ﻿@page "/adminpanel"
 
 @using Microsoft.AspNetCore.Authorization
+@using Project_AMN.Client.Services
+@using Project_AMN.Shared.DTO
+@inject AdminService AdminService
+
 
 @attribute [Authorize]
 
@@ -11,155 +15,171 @@
     <div class="text-center">
         <h3>Welcome @context.User.Identity?.Name | You are now authenticated!</h3>
         <h10><i>As an admin, you have access to create profiles for new employees and grant permissions.</i></h10>
-        <br/>
+        <br />
         <hr class="border-t border-gray-300 my-4" />
     </div>
 </AuthorizeView>
 
-        <h4>Create New User</h4>
-        <div class="mb-4 border p-4 rounded shadow">
-            <input placeholder="First Name" @bind="newUser.FirstName" class="border p-1 mr-2 mb-2" />
-            <input placeholder="Last Name" @bind="newUser.LastName" class="border p-1 mr-2 mb-2" />
-            <input placeholder="Email" @bind="newUser.Email" class="border p-1 mr-2 mb-2" />
-            <input type="password" placeholder="Password" @bind="newUser.Password" class="border p-1 mr-2 mb-2" />
-            <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="border p-1 mr-2 mb-2" />
-            <select @bind="newUser.Role" class="border p-1 mr-2 mb-2">
+<h4>Create New User</h4>
+<div class="mb-4 border p-4 rounded shadow">
+    <input placeholder="First Name" @bind="newUser.FirstName" class="border p-1 mr-2 mb-2" />
+    <input placeholder="Last Name" @bind="newUser.LastName" class="border p-1 mr-2 mb-2" />
+    <input placeholder="Email" @bind="newUser.Email" class="border p-1 mr-2 mb-2" />
+    <input type="password" placeholder="Password" @bind="newUser.Password" class="border p-1 mr-2 mb-2" />
+    <input type="password" placeholder="Confirm Password" @bind="confirmPassword" class="border p-1 mr-2 mb-2" />
+    <select @bind="newUser.Role" class="border p-1 mr-2 mb-2">
+        <option value="Admin">Admin</option>
+        <option value="User">User</option>
+        <option value="Employee">Employee</option>
+    </select>
+    <button class="bg-blue-500 text-black p-1 rounded" @onclick="CreateUser">@GetCreateButtonText()</button>
+</div>
+
+<hr class="border-t border-gray-300 my-4" />
+<h4>Existing Users</h4>
+<div class="space-y-4">
+    @if (users.Count == 0)
+    {
+        <p class="text-gray-500 italic">No users found. Add a new user above to see them here.</p>
+    }
+    else
+    {
+        @foreach (UserDto user in users)
+        {
+            <div class="border rounded p-4 shadow flex justify-between items-center">
+                <div>
+                    <p><strong>Name:</strong> @user.FirstName @user.LastName</p>
+                    <p><strong>Email:</strong> @user.Email</p>
+                    <p><strong>Role:</strong> @string.Join(", ", user.Roles)</p>
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <button class="bg-yellow-500 text-white p-2 rounded" @onclick="() => EditUser(user)">Edit</button>
+                    <button class="bg-red-500 text-white p-1 ml-2 rounded"
+                        @onclick="() => DeleteUser(user.Id!)">Delete</button>
+                </div>
+            </div>
+        }
+
+    }
+</div>
+
+@if (editingUser != null)
+{
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-4 rounded shadow w-1/3">
+            <h4>Edit User</h4>
+            <input placeholder="First Name" @bind="editingUser.FirstName" class="border p-1 mr-2 mb-2 w-full" />
+            <input placeholder="Last Name" @bind="editingUser.LastName" class="border p-1 mr-2 mb-2 w-full" />
+            <input placeholder="Email" @bind="editingUser.Email" class="border p-1 mr-2 mb-2 w-full" />
+            <select @bind="selectedRole" class="border p-1 mr-2 mb-2 w-full">
                 <option value="Admin">Admin</option>
                 <option value="User">User</option>
                 <option value="Employee">Employee</option>
             </select>
-            <button class="bg-blue-500 text-black p-1 rounded" @onclick="CreateUser">@GetCreateButtonText()</button>
-        </div>
-
-        <hr class="border-t border-gray-300 my-4" />
-        <h4>Existing Users</h4>
-        <div class="space-y-4">
-            @if (users.Count == 0)
-            {
-                <p class="text-gray-500 italic">No users found. Add a new user above to see them here.</p>
-            }
-            else
-            {
-                @foreach (var user in users)
-                {
-                    <div class="border rounded p-4 shadow flex justify-between items-center">
-                        <div>
-                            <p><strong>Name:</strong> @user.FirstName @user.LastName</p>
-                            <p><strong>Email:</strong> @user.Email</p>
-                            <p><strong>Role:</strong> @user.Role</p>
-                            <p><strong>Status:</strong> @user.Status</p>
-                        </div>
-                        <div class="flex flex-col space-y-2">
-                            <button class="bg-yellow-500 text-white p-2 rounded" @onclick="() => EditUser(user)">Edit</button>
-                            <button class="bg-red-500 text-white p-2 rounded" @onclick="() => ResetPassword(user)">Reset Password</button>
-                        </div>
-                    </div>
-                }
-            }
-        </div>
-
-        @if (editingUser != null)
-        {
-            <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-                <div class="bg-white p-4 rounded shadow w-1/3">
-                    <h4>Edit User</h4>
-                    <input placeholder="First Name" @bind="editingUser.FirstName" class="border p-1 mr-2 mb-2 w-full" />
-                    <input placeholder="Last Name" @bind="editingUser.LastName" class="border p-1 mr-2 mb-2 w-full" />
-                    <input placeholder="Email" @bind="editingUser.Email" class="border p-1 mr-2 mb-2 w-full" />
-                    <select @bind="editingUser.Role" class="border p-1 mr-2 mb-2 w-full">
-                        <option value="Admin">Admin</option>
-                        <option value="User">User</option>
-                        <option value="Manager">Employee</option>
-                    </select>
-                    <select @bind="editingUser.Status" class="border p-1 mr-2 mb-2 w-full">
-                        <option value="Active">Active</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                    <div class="flex justify-end">
-                        <button class="bg-gray-500 text-white p-1 mr-2 rounded" @onclick="CancelEdit">Cancel</button>
-                        <button class="bg-green-500 text-white p-1 rounded" @onclick="SaveEdit">Save</button>
-                    </div>
-                </div>
+            <div class="flex justify-end">
+                <button class="bg-gray-500 text-white p-1 mr-2 rounded" @onclick="CancelEdit">Cancel</button>
+                <button class="bg-green-500 text-white p-1 rounded" @onclick="SaveEdit">Save</button>
             </div>
-        }
+        </div>
+    </div>
+}
 @code {
-    private List<User> users = new();
-    private User newUser = new User { Role = "Admin" };
-    private User? editingUser;
+    private List<UserDto> users = new();
+    private CreateUserDto newUser = new() { Role = "User" };
+    private UpdateUserDto? editingUser;
     private string confirmPassword = "";
+    private string? editingUserId;
+    private string selectedRole = "User";
+
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadUsers();
+        await GetAllUsers();
     }
 
-    private async Task LoadUsers()
+    private async Task GetAllUsers()
     {
-        // API call to load users
+        users = await AdminService.GetAllUsersAsync();
     }
 
     private async Task CreateUser()
     {
-        if (newUser.Password != confirmPassword) return;
-        // API call to create user
-        newUser = new User { Role = "Admin" };
-        confirmPassword = "";
-        await LoadUsers();
+        if (newUser.Password != confirmPassword)
+            return;
+
+        var createdUser = await AdminService.CreateUserAsync(newUser);
+
+        if (createdUser is not null)
+        {
+            users.Add(createdUser);
+            newUser = new CreateUserDto { Role = "User" };
+            confirmPassword = "";
+        }
     }
 
-    private void EditUser(User user)
+    private void EditUser(UserDto user)
     {
-        editingUser = new User
+        editingUser = new UpdateUserDto
         {
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            Role = user.Role,
-            Status = user.Status
+            Roles = user.Roles
         };
+        editingUserId = user.Id;
+
+        selectedRole = user.Roles.FirstOrDefault() ?? "User";
     }
+
 
     private void CancelEdit() => editingUser = null;
 
     private async Task SaveEdit()
     {
-        if (editingUser == null) return;
-        // API call to update user
-        editingUser = null;
-        await LoadUsers();
+        if (editingUser is null || string.IsNullOrWhiteSpace(editingUserId))
+            return;
+
+        editingUser.Roles = new List<string> { selectedRole };
+
+        var updatedUser = await AdminService.UpdateUserAsync(editingUserId, editingUser);
+
+        if (updatedUser is not null)
+        {
+            var index = users.FindIndex(u => u.Id == editingUserId);
+            if (index != -1)
+            {
+                users[index] = updatedUser;
+            }
+            editingUser = null;
+            editingUserId = null;
+            selectedRole = "User";
+        }
     }
 
-    private async Task ResetPassword(User user)
+    private async Task DeleteUser(string userId)
     {
-        // API call to reset password
+        var success = await AdminService.DeleteUserAsync(userId);
+        if (success)
+        {
+            users.RemoveAll(u => u.Id == userId);
+        }
     }
 
     private string GetCreateButtonText()
     {
         return string.IsNullOrWhiteSpace(newUser.Role) ? "Create User" : $"Create {newUser.Role}";
     }
-
-    public class User
-    {
-        public string FirstName { get; set; } = "";
-        public string LastName { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string Role { get; set; } = "Admin";
-        public string Status { get; set; } = "Active";
-    }
 }
 
 
 
-        @* <h4>Existing Users</h4>
+@* <h4>Existing Users</h4>
         <table class="border-collapse border border-gray-300 w-full mb-4">
             <thead>
                 <tr class="bg-gray-200">
                     <th class="border p-1">Name</th>
                     <th class="border p-1">Email</th>
                     <th class="border p-1">Role</th>
-                    <th class="border p-1">Status</th>
                     <th class="border p-1">Actions</th>
                 </tr>
             </thead>
@@ -170,7 +190,6 @@
                         <td class="border p-1">@user.FirstName @user.LastName</td>
                         <td class="border p-1">@user.Email</td>
                         <td class="border p-1">@user.Role</td>
-                        <td class="border p-1">@user.Status</td>
                         <td class="border p-1">
                             <button class="bg-yellow-500 text-white p-1 mr-1 rounded" @onclick="() => EditUser(user)">Edit</button>
                             <button class="bg-red-500 text-white p-1 mr-1 rounded" @onclick="() => ResetPassword(user)">Reset Password</button>

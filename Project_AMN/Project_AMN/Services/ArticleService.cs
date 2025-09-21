@@ -137,42 +137,42 @@ namespace Project_AMN.Services
         /// </summary>
         /// <param name="filter">Search and filter criteria.</param>
         /// <returns>A filtered and paginated list of articles.</returns>
-       public async Task<IEnumerable<ArticleResultDto>> SearchArticlesAsync(QueryFilter filter)
-{
-    var query = _context.Articles.AsQueryable();
-
-    // 🔎 Fuzzy search: Id, Name, Stock
-    if (!string.IsNullOrWhiteSpace(filter.Search))
-    {
-        var search = filter.Search.Trim().ToLower();
-
-        query = query.Where(a =>
-            a.Id.ToString().Contains(search) ||
-            a.Name.ToLower().Contains(search) ||
-            a.Stock.ToString().Contains(search)
-        );
-    }
-
-    // 📄 Pagination (default to 1 if Page not set)
-    var page = filter.Page <= 0 ? 1 : filter.Page;
-    var pageSize = filter.PageSize <= 0 ? 10 : filter.PageSize;
-
-    query = query
-        .OrderBy(a => a.Id) // or Name if you prefer alphabetic sorting
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize);
-
-    return await query
-        .Select(a => new ArticleResultDto
+        public async Task<IEnumerable<ArticleResultDto>> SearchArticlesAsync(QueryFilter filter)
         {
-            Id = a.Id,
-            Name = a.Name,
-            SKU = a.SKU,
-            Stock = a.Stock,
-            Location = a.Location
-        })
-        .ToListAsync();
-}
+            var query = _context.Articles.AsQueryable();
+
+            // 🔎 Fuzzy search: Id, Name, Stock
+            if (!string.IsNullOrWhiteSpace(filter.Search))
+            {
+                var search = filter.Search.Trim().ToLower();
+
+                query = query.Where(a =>
+                    a.Id.ToString().Contains(search) ||
+                    a.Name.ToLower().Contains(search) ||
+                    a.Stock.ToString().Contains(search)
+                );
+            }
+
+            // 📄 Pagination (default to 1 if Page not set)
+            var page = filter.Page <= 0 ? 1 : filter.Page;
+            var pageSize = filter.PageSize <= 0 ? 10 : filter.PageSize;
+
+            query = query
+                .OrderBy(a => a.Id) // or Name if you prefer alphabetic sorting
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize);
+
+            return await query
+                .Select(a => new ArticleResultDto
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    SKU = a.SKU,
+                    Stock = a.Stock,
+                    Location = a.Location
+                })
+                .ToListAsync();
+        }
 
 
     }

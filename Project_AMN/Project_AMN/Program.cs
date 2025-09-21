@@ -8,11 +8,11 @@ builder.Services.AddHttpClient();
 // MediatR
 builder.Services.AddMediatR(cfg =>
 {
-
     cfg.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(CreateArticleHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(UpdateArticleHandler).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(CreateUserHandler).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
 });
 
 // Blazor Components
