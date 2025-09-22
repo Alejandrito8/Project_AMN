@@ -162,3 +162,20 @@ main {
     width: 100%;
 }
 
+.gray-rects {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 kolumner */
+    gap: 30px;                             /* mellanrum */
+    max-width: 1000px;
+    margin: 0 auto;                        /* centrera hela blocket */
+    text-align: center;                    /* centrera rubrikerna */
+}
+
+.gray-rect {
+    background-color: #e5e5e5;
+    height: 150px;
+    border-radius: 10px;
+    display: flex;              /* för att centrera ev. innehåll i rutan */
+    align-items: center;
+    justify-content: center;
+}
