@@ -8,7 +8,7 @@ public static class OrderEndpoints
         app.MapGet("/api/orders", async (IMediator mediator) =>
         {
             var orders = await mediator.Send(new ListOrderQuery());
-            return orders.Any() ? Results.Ok(orders) : Results.NotFound("No orders found.");
+            return Results.Ok(orders);
         });
         
         // app.MapGet("/api/orders/{orderId:int}", async (int orderId, IMediator mediator) =>

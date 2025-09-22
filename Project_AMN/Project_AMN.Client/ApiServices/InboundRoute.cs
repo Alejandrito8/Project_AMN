@@ -1,32 +1,32 @@
-using Project_AMN.Shared.DTO;
 using System.Net.Http.Json;
-namespace Project_AMN.Client.Services;
+using Project_AMN.Shared.DTO;
 
-public class InboundService
+namespace Project_AMN.Client.Services
 {
-    private readonly HttpClient _http;
-
-    public InboundService(HttpClient http)
+    public class InboundService
     {
-        _http = http;
+        private readonly HttpClient _http;
+
+        public InboundService(HttpClient http)
+        {
+            _http = http;
+        }
+
+        public async Task<ArticleResultDto?> RegisterInboundAsync(string sku, int quantity)
+        {
+            // Skicka PUT request till inbound endpoint
+            var response = await _http.PutAsJsonAsync($"/api/inbound/{sku}?quantity={quantity}", 
+                                                       value: (object?)null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var article = await response.Content.ReadFromJsonAsync<ArticleResultDto>();
+                return article;
+            }
+
+            var error = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Fel vid registrering: {error}");
+            return null;
+        }
     }
-
-public async Task<List<bool>> RegisterInboundAsync(string sku, int quantity)
-{
-    var response = await _http.PostAsJsonAsync(
-        $"/api/inbounds/register?sku={sku}&quantity={quantity}", 
-        value: (object?)null
-    );
-
-    if (response.IsSuccessStatusCode)
-    {
-        var result = await response.Content.ReadFromJsonAsync<List<bool>>();
-        return result ?? new List<bool>();
-    }
-
-    var error = await response.Content.ReadAsStringAsync();
-    Console.WriteLine($"Fel vid registrering: {error}");
-    return new List<bool>();
-}
-
 }

@@ -170,31 +170,3 @@
         return string.IsNullOrWhiteSpace(newUser.Role) ? "Create User" : $"Create {newUser.Role}";
     }
 }
-
-
-
-@* <h4>Existing Users</h4>
-        <table class="border-collapse border border-gray-300 w-full mb-4">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="border p-1">Name</th>
-                    <th class="border p-1">Email</th>
-                    <th class="border p-1">Role</th>
-                    <th class="border p-1">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in users)
-                {
-                    <tr>
-                        <td class="border p-1">@user.FirstName @user.LastName</td>
-                        <td class="border p-1">@user.Email</td>
-                        <td class="border p-1">@user.Role</td>
-                        <td class="border p-1">
-                            <button class="bg-yellow-500 text-white p-1 mr-1 rounded" @onclick="() => EditUser(user)">Edit</button>
-                            <button class="bg-red-500 text-white p-1 mr-1 rounded" @onclick="() => ResetPassword(user)">Reset Password</button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table> *@

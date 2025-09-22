@@ -1,35 +1,262 @@
 @page "/commerceAdmin"
 @using Microsoft.AspNetCore.Authorization
+@using Project_AMN.Client.Services
+@using Project_AMN.Shared.DTO
+@using Project_AMN.Shared.Models
+@using Microsoft.AspNetCore.Components.Authorization
 
-@attribute [Authorize]
+@inject ArticleService ArticleService
+@inject InboundService InboundService
 
 <PageTitle>Commerce Admin</PageTitle>
-<h1 class="text-center">Commerce Dashboard </h1>
+
+<h1 class="text-center text-2xl font-bold mb-6">Commerce Dashboard</h1>
 
 <AuthorizeView>
-    <div class="text-center">
-        <h3><i>As an admin...</i></h3>
-        <br/>
-        <hr class="border-t border-gray-300 my-4" />
-    </div>
+    <Authorized>
+        <div class="text-center mb-6">
+            <h3 class="text-lg font-semibold">
+                Welcome @context.User.Identity?.Name | You are now authenticated!
+            </h3>
+            <p class="italic">As an admin, you can manage articles, orders, and inbound items.</p>
+            <hr class="border-t border-gray-300 my-4" />
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p class="text-center text-red-600">You do not have permission to access this page.</p>
+    </NotAuthorized>
 </AuthorizeView>
 
-<div class="gray-rects">
-    <div>
-        <h3>Articles</h3>
-        <div class="gray-rect">
+<!-- GRID LAYOUT -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <!-- ARTICLES SECTION -->
+    <div class="p-4 border rounded-2xl shadow bg-white">
+        <h3 class="text-lg font-bold mb-3">Articles</h3>
+
+        <div class="space-y-2 mb-4">
+            <input placeholder="Name" @bind="newArticle.Name" class="border p-2 w-full rounded" />
+            <input placeholder="SKU" @bind="newArticle.SKU" class="border p-2 w-full rounded" />
+            <input type="number" placeholder="Price" @bind="newArticle.Price" min="0.01" step="0.01"
+                   class="border p-2 w-full rounded" />
+            <input type="number" placeholder="Stock" @bind="newArticle.Stock" min="0" step="1"
+                   class="border p-2 w-full rounded" />
+            <input placeholder="Location" @bind="newArticle.Location" class="border p-2 w-full rounded" />
+            <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded w-full" @onclick="CreateArticle">
+                Create
+            </button>
+        </div>
+
+        <h4 class="font-semibold mb-2">Existing Articles</h4>
+
+        @if (articles == null || !articles.Any())
+        {
+            <p class="text-gray-500 italic">No articles found.</p>
+        }
+        else
+        {
+<ul class="list-disc list-inside max-h-64 overflow-y-auto space-y-1">
+    @foreach (var article in articles)
+    {
+        <li class="flex justify-between items-center">
+            <span>@article.Name (@article.SKU) - Stock: @article.Stock - Price: @article.Price</span>
+            <div class="flex space-x-2">
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded"
+                        @onclick="() => EditArticle(article)">
+                    Edit
+                </button>
+                <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                        @onclick="() => DeleteArticle(article.Id)">
+                    Delete
+                </button>
+            </div>
+        </li>
+    }
+</ul>
+@if (editingArticle != null)
+{
+    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+        <div class="bg-white p-4 rounded shadow w-1/3">
+            <h4>Edit Article</h4>
+            <input placeholder="Name" @bind="editingArticleDto.Name" class="border p-1 mb-2 w-full" />
+            <input type="number" placeholder="Price" @bind="editingArticleDto.Price" min="0.01" step="0.01" class="border p-1 mb-2 w-full" />
+            <input type="number" placeholder="Stock" @bind="editingArticleDto.Stock" min="0" step="1" class="border p-1 mb-2 w-full" />
+            <input placeholder="Location" @bind="editingArticleDto.Location" class="border p-1 mb-2 w-full" />
+            <div class="flex justify-end space-x-2">
+                <button class="bg-gray-500 text-white p-1 rounded" @onclick="CancelEditArticle">Cancel</button>
+                <button class="bg-green-500 text-white p-1 rounded" @onclick="SaveEditArticle">Save</button>
+            </div>
         </div>
     </div>
+}
 
-    <div>
-        <h3>Orders</h3>
-        <div class="gray-rect">
-        </div>
+
+        }
     </div>
 
-    <div>
-        <h3>Inbounds</h3>
-        <div class="gray-rect">
+    <!-- ORDERS SECTION -->
+    <div class="p-4 border rounded-2xl shadow bg-white">
+        <h3 class="text-lg font-bold mb-3">Orders</h3>
+
+        @if (orders == null || !orders.Any())
+        {
+            <p class="text-gray-500 italic">No orders available.</p>
+        }
+        else
+        {
+            <ul class="list-disc list-inside max-h-64 overflow-y-auto space-y-1">
+                @foreach (var order in orders)
+                {
+                    <li>@order</li>
+                }
+            </ul>
+        }
+    </div>
+
+    <!-- INBOUNDS SECTION -->
+    <div class="p-4 border rounded-2xl shadow bg-white">
+        <h3 class="text-lg font-bold mb-3">Inbounds</h3>
+
+        <div class="space-y-2 mb-4">
+            <input placeholder="Article SKU" @bind="inboundSku" class="border p-2 w-full rounded" />
+            <input type="number" placeholder="Quantity" @bind="inboundQuantity" min="1" step="1"
+                   class="border p-2 w-full rounded" />
+            <button class="bg-green-500 hover:bg-green-600 text-white p-2 rounded w-full"
+                    @onclick="RegisterInbound">
+                Register
+            </button>
         </div>
+
+        @if (!string.IsNullOrEmpty(inboundMessage))
+        {
+            <p class="mt-2 text-blue-600">@inboundMessage</p>
+        }
     </div>
 </div>
+
+@code {
+    private ArticleCreateDto newArticle = new();
+    private List<ArticleResultDto> articles = new(); 
+    private ArticleResultDto? editingArticle;
+    private ArticleUpdateDto editingArticleDto = new ArticleUpdateDto();
+    private List<string> orders = new();
+    private string inboundSku = string.Empty;
+    private int inboundQuantity;
+    private string inboundMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadArticlesAsync();
+        orders = new List<string>();
+    }
+
+    private async Task LoadArticlesAsync()
+    {
+        var result = await ArticleService.GetAllArticlesAsync();
+        articles = result?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
+    }
+
+    private async Task CreateArticle()
+    {
+        if (string.IsNullOrWhiteSpace(newArticle.Name) ||
+            string.IsNullOrWhiteSpace(newArticle.SKU) ||
+            newArticle.Price <= 0 ||
+            newArticle.Stock < 0)
+            return;
+
+        await ArticleService.CreateArticleAsync(newArticle);
+        await LoadArticlesAsync();
+        newArticle = new ArticleCreateDto();
+    }
+
+    private async Task DeleteArticle(int id)
+    {
+        await ArticleService.DeleteArticleAsync(id);
+        await LoadArticlesAsync();
+    }
+
+private void EditArticle(ArticleResultDto article)
+{
+    editingArticle = article;
+    editingArticleDto = new ArticleUpdateDto
+    {
+        Name = article.Name,
+        Price = article.Price,
+        Stock = article.Stock,
+        Location = article.Location
+    };
+}
+
+private void CancelEditArticle()
+{
+    editingArticle = null;
+    editingArticleDto = new ArticleUpdateDto();
+}
+
+private async Task SaveEditArticle()
+{
+    if (editingArticle == null)
+        return;
+
+    // Frontend-validering
+    if (editingArticleDto.Price <= 0)
+    {
+        inboundMessage = "Price must be greater than 0.";
+        return;
+    }
+
+    if (editingArticleDto.Stock < 0)
+    {
+        inboundMessage = "Stock cannot be negative.";
+        return;
+    }
+
+    var updatedArticle = await ArticleService.UpdateArticleAsync(editingArticleDto, editingArticle.SKU);
+
+    if (updatedArticle != null)
+    {
+        var index = articles.FindIndex(a => a.SKU == editingArticle.SKU);
+        if (index != -1)
+            articles[index] = updatedArticle;
+
+        inboundMessage = $"Article '{updatedArticle.Name}' updated successfully!";
+        CancelEditArticle();
+    }
+}
+
+
+
+
+private async Task RegisterInbound()
+{
+    inboundMessage = string.Empty;
+
+    if (string.IsNullOrWhiteSpace(inboundSku) || inboundQuantity <= 0)
+    {
+        inboundMessage = "Please enter a valid SKU and quantity greater than 0.";
+        return;
+    }
+
+    try
+    {
+        var updatedArticle = await InboundService.RegisterInboundAsync(inboundSku, inboundQuantity);
+
+        if (updatedArticle is null)
+        {
+            inboundMessage = $"Article with SKU '{inboundSku}' not found.";
+        }
+        else
+        {
+            inboundMessage = $"Inbound registered successfully! New stock for '{updatedArticle.Name}' (SKU: {updatedArticle.SKU}): {updatedArticle.Stock}";
+            await LoadArticlesAsync(); 
+        }
+        inboundSku = string.Empty;
+        inboundQuantity = 0;
+    }
+    catch (Exception ex)
+    {
+        inboundMessage = $"Error registering inbound: {ex.Message}";
+    }
+}
+
+
+}
