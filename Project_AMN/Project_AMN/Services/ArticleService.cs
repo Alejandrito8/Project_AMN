@@ -118,6 +118,8 @@ namespace Project_AMN.Services
 
             article.Name = dto.Name;
             article.Location = dto.Location;
+            article.Stock = dto.Stock;
+            article.Price = dto.Price;
             _context.Articles.Update(article);
             await _context.SaveChangesAsync();
             return new ArticleResultDto

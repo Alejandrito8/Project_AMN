@@ -12,12 +12,12 @@ public static class AdminEndpoints
             return user is null ? Results.BadRequest("Could not create user") : Results.Ok(user);
         })
         .RequireAuthorization(policy => policy.RequireRole("Admin"));
- 
+
 
         app.MapGet("/api/admin/users", async (IMediator mediator) =>
         {
             var users = await mediator.Send(new ListUsersQuery());
-            return users.Any() ? Results.Ok(users) : Results.NotFound("No users found");
+            return Results.Ok(users);
         })
         .RequireAuthorization(policy => policy.RequireRole("Admin"));
 

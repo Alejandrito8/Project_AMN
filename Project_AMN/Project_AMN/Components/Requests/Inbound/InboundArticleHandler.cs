@@ -1,19 +1,26 @@
-
 namespace Project_AMN.Handler
 {
-public class InboundArticleHandler : IRequestHandler<InboundArticleCommand, ArticleResultDto?>
-{
-    private readonly IInboundService _inboundService;
-
-    public InboundArticleHandler(IInboundService inboundService)
+    public class InboundArticleHandler : IRequestHandler<InboundArticleCommand, ArticleResultDto?>
     {
-        _inboundService = inboundService;
-    }
+        private readonly IInboundService _inboundService;
+        private readonly IArticleService _articleService;
 
-        public Task<ArticleResultDto?> Handle(InboundArticleCommand request, CancellationToken cancellationToken)
+        public InboundArticleHandler(IInboundService inboundService, IArticleService articleService)
         {
-            var result = _inboundService.RegisterInboundAsync(request.SKU, request.Quantity);
-            return result.ContinueWith(t => t.Result ? new ArticleResultDto { SKU = request.SKU, Stock = request.Quantity } : null, cancellationToken);
+            _inboundService = inboundService;
+            _articleService = articleService;
+        }
+
+        public async Task<ArticleResultDto?> Handle(InboundArticleCommand request, CancellationToken cancellationToken)
+        {
+            // Registrera inleveransen via InboundService
+            var success = await _inboundService.RegisterInboundAsync(request.SKU, request.Quantity);
+            if (!success) return null;
+
+            // Hämta och returnera uppdaterad artikel
+            var articles = await _articleService.GetAllArticlesAsync();
+            var updatedArticle = articles.FirstOrDefault(a => a.SKU == request.SKU);
+            return updatedArticle;
         }
     }
 }

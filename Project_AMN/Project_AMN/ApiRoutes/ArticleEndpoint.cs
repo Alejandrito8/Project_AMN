@@ -8,15 +8,16 @@ public static class ArticleEndpoints
         app.MapGet("/api/articles", async (IMediator mediator) =>
         {
             var articles = await mediator.Send(new ListArticleQuery());
-            return articles.Any() ? Results.Ok(articles) : Results.NotFound("No articles found.");
+            return Results.Ok(articles);
         });
+
 
         // app.MapGet("/api/articles/{id:int}", async (int id, IMediator mediator) =>
         // {
         //     var article = await mediator.Send(new GetArticleByIdQuery(id));
         //     return article is null ? Results.NotFound($"Article with ID {id} not found.") : Results.Ok(article);
         // });
-        
+
         app.MapPost("/api/articles", async (CreateArticleCommand articleCommand, IMediator mediator) =>
         {
             var article = await mediator.Send(articleCommand);

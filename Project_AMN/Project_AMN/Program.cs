@@ -105,7 +105,7 @@ await InitializeRolesAndAdmin(app);
 
 app.Run();
 
-// --- Metoden för att initiera roller och admin ---
+
 async Task InitializeRolesAndAdmin(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
