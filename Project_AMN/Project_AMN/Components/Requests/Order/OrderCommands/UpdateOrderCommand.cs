@@ -1,4 +1,3 @@
-using MediatR;
 
 namespace Project_AMN.Commands;
 

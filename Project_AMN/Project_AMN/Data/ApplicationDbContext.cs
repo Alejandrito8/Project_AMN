@@ -1,8 +1,8 @@
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
 {
-     public DbSet<Order> Orders { get; set; }
+    public DbSet<Order> Orders { get; set; }
     public DbSet<Article> Articles{ get; set; }
-    // New DbSet for UserActivity
+    public DbSet<OrderItem> OrderItems { get; set; }
     
 
 
