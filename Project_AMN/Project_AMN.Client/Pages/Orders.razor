@@ -3,14 +3,10 @@
 @using Project_AMN.Shared.DTO
 @inject OrderService OrderService
 @inject ArticleService ArticleService
-
+@inject IJSRuntime JS
+ 
 <h3 class="mb-4">Create Your Order</h3>
-
-<div class="mb-4">
-    <label class="form-label">Shipping Address:</label>
-    <input type="text" placeholder="Enter your shipping address" @bind="shippingAddress" class="form-control" />
-</div>
-
+ 
 <h4 class="mb-3">Available Articles</h4>
 <div class="row">
     @foreach (var article in articles)
@@ -21,12 +17,12 @@
                     <h5 class="card-title">@article.Name</h5>
                     <p class="card-text mb-1">Price: <strong>@article.Price kr</strong></p>
                     <p class="card-text mb-3">
-                        Stock: 
-                        @if(article.Stock > 5)
+                        Stock:
+                        @if (article.Stock > 5)
                         {
                             <span class="badge bg-success">@article.Stock</span>
                         }
-                        else if(article.Stock > 0)
+                        else if (article.Stock > 0)
                         {
                             <span class="badge bg-warning text-dark">@article.Stock</span>
                         }
@@ -35,15 +31,18 @@
                             <span class="badge bg-danger">Out of Stock</span>
                         }
                     </p>
-                    <button class="btn btn-primary mt-auto" @onclick="() => AddToCart(article)" disabled="@(!CanAddToCart(article))">
-                        Add to Cart
-                    </button>
+                    <div class="d-flex justify-content-center mt-auto">
+                        <button class="btn btn-primary btn-sm" style="min-width:120px; max-width:150px;"
+                                @onclick="() => AddToCart(article)" disabled="@(!CanAddToCart(article))">
+                            Add to Cart
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     }
 </div>
-
+ 
 <h4 class="mt-5">Your Cart</h4>
 @if (cart.Any())
 {
@@ -53,87 +52,150 @@
                 <tr>
                     <th>Name</th>
                     <th>Price</th>
-                    <th style="width: 120px;">Remove</th>
+                    <th style="width: 120px;">Quantity</th>
+                    <th style="width: 180px;">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var item in cart)
                 {
                     <tr>
-                        <td>@item.Name</td>
-                        <td>@item.Price kr</td>
+                        <td>@item.Article.Name</td>
+                        <td>@(item.Article.Price * item.Quantity) kr</td>
                         <td>
-                            <button class="btn btn-danger btn-sm w-100" @onclick="() => RemoveFromCart(item)">Remove</button>
+                            <div class="d-flex gap-1">
+                                <button class="btn btn-sm btn-secondary" style="width:40px;"
+                                        @onclick="() => DecreaseQuantity(item)">-</button>
+                                <span class="px-2 align-self-center">@item.Quantity</span>
+                                <button class="btn btn-sm btn-secondary" style="width:40px;"
+                                        @onclick="() => IncreaseQuantity(item)">+</button>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" style="min-width:120px; max-width:150px;"
+                                    @onclick="() => cart.Remove(item)">Remove</button>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
-    <p class="fw-bold fs-5">Total Amount: @cart.Sum(i => i.Price) kr</p>
-    <button class="btn btn-success btn-lg" @onclick="CreateOrder">Place Order</button>
+ 
+    <p class="fw-bold fs-5">Total Amount: @cart.Sum(i => i.Article.Price * i.Quantity) kr</p>
+ 
+    <div class="d-flex justify-content-start mt-2">
+        <button class="btn btn-success btn-sm" style="min-width:120px; max-width:150px;"
+                @onclick="async () => await CreateOrder()">Place Order</button>
+    </div>
 }
 else
 {
     <p class="text-muted">Your cart is empty. Add some articles to create an order.</p>
 }
-
+ 
 @if (!string.IsNullOrEmpty(successMessage))
 {
     <div class="alert alert-success mt-3">@successMessage</div>
 }
-
+ 
 @code {
     private List<ArticleResultDto> articles = new();
-    private List<ArticleResultDto> cart = new();
-    private string shippingAddress = string.Empty;
+ 
+    private class CartItem
+    {
+        public ArticleResultDto Article { get; set; } = null!;
+        public int Quantity { get; set; } = 1;
+    }
+ 
+    private List<CartItem> cart = new();
     private string successMessage = string.Empty;
-
+ 
     protected override async Task OnInitializedAsync()
     {
         var allArticles = await ArticleService.GetAllArticlesAsync();
         articles = allArticles.Where(a => a != null).Select(a => a!).ToList();
     }
-
+ 
     private bool CanAddToCart(ArticleResultDto article)
     {
-        return article.Stock > 0 && !cart.Any(i => i.Id == article.Id);
+        var existing = cart.FirstOrDefault(c => c.Article.Id == article.Id);
+        return article.Stock > 0 && (existing == null || existing.Quantity < article.Stock);
     }
-
+ 
     private void AddToCart(ArticleResultDto article)
     {
-        if (!CanAddToCart(article)) return;
-        cart.Add(article);
+        var existing = cart.FirstOrDefault(c => c.Article.Id == article.Id);
+        if (existing != null)
+        {
+            if (existing.Quantity < article.Stock)
+            {
+                existing.Quantity++;
+            }
+        }
+        else
+        {
+            cart.Add(new CartItem { Article = article, Quantity = 1 });
+        }
     }
-
-    private void RemoveFromCart(ArticleResultDto item)
+ 
+    private void IncreaseQuantity(CartItem item)
     {
-        cart.Remove(item);
+        var article = articles.FirstOrDefault(a => a.Id == item.Article.Id);
+        if (article != null && item.Quantity < article.Stock)
+        {
+            item.Quantity++;
+        }
     }
-
+ 
+    private void DecreaseQuantity(CartItem item)
+    {
+        if (item.Quantity > 1)
+        {
+            item.Quantity--;
+        }
+        else
+        {
+            cart.Remove(item);
+        }
+    }
+ 
     private async Task CreateOrder()
     {
-        if (!cart.Any() || string.IsNullOrWhiteSpace(shippingAddress)) return;
-
+        if (!cart.Any())
+        {
+            successMessage = "Your cart is empty!";
+            return;
+        }
+ 
         var orderDto = new OrderCreateDto
         {
-            ShippingAddress = shippingAddress,
-            TotalAmount = cart.Sum(a => a.Price),
-            Items = cart.Select(a => new OrderItemCreateDto
+            TotalAmount = cart.Sum(c => c.Article.Price * c.Quantity),
+            Items = cart.Select(c => new OrderItemCreateDto
             {
-                ArticleId = a.Id,
-                Quantity = 1,
-                OrderPrice = a.Price
+                ArticleId = c.Article.Id,
+                Quantity = c.Quantity,
+                OrderPrice = c.Article.Price
             }).ToList()
         };
-
+ 
         var createdOrder = await OrderService.CreateOrderAsync(orderDto);
-
+ 
         if (createdOrder != null)
         {
+            foreach (var c in cart)
+            {
+                var article = articles.FirstOrDefault(a => a.Id == c.Article.Id);
+                if (article != null)
+                {
+                    article.Stock -= c.Quantity;
+                    if (article.Stock < 0)
+                        article.Stock = 0;
+                }
+            }
+ 
             successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
             cart.Clear();
-            shippingAddress = string.Empty;
+            StateHasChanged();
         }
         else
         {
@@ -141,3 +203,5 @@ else
         }
     }
 }
+ 
+ 
