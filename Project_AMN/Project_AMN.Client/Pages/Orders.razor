@@ -3,10 +3,9 @@
 @using Project_AMN.Shared.DTO
 @inject OrderService OrderService
 @inject ArticleService ArticleService
-@inject IJSRuntime JS
- 
+
 <h3 class="mb-4">Create Your Order</h3>
- 
+
 <h4 class="mb-3">Available Articles</h4>
 
 <!-- Search and Stock Filter -->
@@ -53,7 +52,7 @@
         </div>
     }
 </div>
- 
+
 <h4 class="mt-5">Your Cart</h4>
 @if (cart.Any())
 {
@@ -91,9 +90,9 @@
             </tbody>
         </table>
     </div>
- 
+
     <p class="fw-bold fs-5">Total Amount: @cart.Sum(i => i.Article.Price * i.Quantity) kr</p>
- 
+
     <div class="d-flex justify-content-start mt-2">
         <button class="btn btn-success btn-sm" style="min-width:120px; max-width:150px;"
                 @onclick="async () => await CreateOrder()">Place Order</button>
@@ -103,21 +102,21 @@ else
 {
     <p class="text-muted">Your cart is empty. Add some articles to create an order.</p>
 }
- 
+
 @if (!string.IsNullOrEmpty(successMessage))
 {
     <div class="alert alert-success mt-3">@successMessage</div>
 }
- 
+
 @code {
     private List<ArticleResultDto> articles = new();
- 
+
     private class CartItem
     {
         public ArticleResultDto Article { get; set; } = null!;
         public int Quantity { get; set; } = 1;
     }
- 
+
     private List<CartItem> cart = new();
     private string successMessage = string.Empty;
 
@@ -126,32 +125,35 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var allArticles = await ArticleService.GetAllArticlesAsync();
-        articles = allArticles.Where(a => a != null).Select(a => a!).ToList();
+        await LoadArticlesAsync();
     }
- 
+
+    private async Task LoadArticlesAsync()
+    {
+        var result = await ArticleService.GetAllArticlesAsync();
+        articles = result?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
+    }
+
     private bool CanAddToCart(ArticleResultDto article)
     {
         var existing = cart.FirstOrDefault(c => c.Article.Id == article.Id);
         return article.Stock > 0 && (existing == null || existing.Quantity < article.Stock);
     }
- 
+
     private void AddToCart(ArticleResultDto article)
     {
         var existing = cart.FirstOrDefault(c => c.Article.Id == article.Id);
         if (existing != null)
         {
             if (existing.Quantity < article.Stock)
-            {
                 existing.Quantity++;
-            }
         }
         else
         {
             cart.Add(new CartItem { Article = article, Quantity = 1 });
         }
     }
- 
+
     private void IncreaseQuantity(CartItem item)
     {
         var article = articles.FirstOrDefault(a => a.Id == item.Article.Id);
@@ -160,19 +162,15 @@ else
             item.Quantity++;
         }
     }
- 
+
     private void DecreaseQuantity(CartItem item)
     {
         if (item.Quantity > 1)
-        {
             item.Quantity--;
-        }
         else
-        {
             cart.Remove(item);
-        }
     }
- 
+
     private async Task CreateOrder()
     {
         if (!cart.Any())
@@ -180,7 +178,7 @@ else
             successMessage = "Your cart is empty!";
             return;
         }
- 
+
         var orderDto = new OrderCreateDto
         {
             TotalAmount = cart.Sum(c => c.Article.Price * c.Quantity),
@@ -191,24 +189,16 @@ else
                 OrderPrice = c.Article.Price
             }).ToList()
         };
- 
+
         var createdOrder = await OrderService.CreateOrderAsync(orderDto);
- 
+
         if (createdOrder != null)
         {
-            foreach (var c in cart)
-            {
-                var article = articles.FirstOrDefault(a => a.Id == c.Article.Id);
-                if (article != null)
-                {
-                    article.Stock -= c.Quantity;
-                    if (article.Stock < 0)
-                        article.Stock = 0;
-                }
-            }
- 
-            successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
+            // Hämta färska artiklar från databasen
+            await LoadArticlesAsync();
+
             cart.Clear();
+            successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
             StateHasChanged();
         }
         else
@@ -217,7 +207,6 @@ else
         }
     }
 
-    // Filtered articles based on search and stock
     private IEnumerable<ArticleResultDto> FilteredArticles =>
         articles.Where(a =>
             (string.IsNullOrWhiteSpace(searchText) ||
@@ -229,5 +218,3 @@ else
              (stockFilter == "out" && a.Stock == 0))
         );
 }
- 
- 
