@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Project_AMN.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250920153048_initcreate")]
-    partial class initcreate
+    [Migration("20250923121130_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -276,6 +276,33 @@ namespace Project_AMN.Migrations
                     b.ToTable("Orders");
                 });
 
+            modelBuilder.Entity("Project_AMN.Shared.Models.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("OrderPrice")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ArticleId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("OrderItems");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -325,6 +352,30 @@ namespace Project_AMN.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Project_AMN.Shared.Models.OrderItem", b =>
+                {
+                    b.HasOne("Project_AMN.Shared.Models.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ArticleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Project_AMN.Shared.Models.Order", "Order")
+                        .WithMany("Items")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Project_AMN.Shared.Models.Order", b =>
+                {
+                    b.Navigation("Items");
                 });
 #pragma warning restore 612, 618
         }

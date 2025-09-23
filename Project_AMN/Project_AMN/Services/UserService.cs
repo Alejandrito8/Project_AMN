@@ -1,16 +1,25 @@
 namespace Project_AMN.Services;
 
+/// <summary>
+/// Provides services for managing users, including creation, update, and retrieval.
+/// </summary>
 public class UserService : IUserService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UserService"/> class.
+    /// </summary>
     public UserService(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
         _userManager = userManager;
         _roleManager = roleManager;
     }
 
+    /// <summary>
+    /// Creates a new user and assigns roles.
+    /// </summary>
     public async Task<UserDto?> CreateUserAsync(CreateUserDto dto)
     {
         var user = new ApplicationUser
@@ -27,7 +36,7 @@ public class UserService : IUserService
             throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
         }
 
-        // Skapa roll om den inte finns
+        // Create role if it does not exist
         if (!await _roleManager.RoleExistsAsync(dto.Role))
         {
             await _roleManager.CreateAsync(new IdentityRole(dto.Role));
@@ -45,6 +54,9 @@ public class UserService : IUserService
         };
     }
 
+    /// <summary>
+    /// Retrieves all users with their roles.
+    /// </summary>
     public async Task<IReadOnlyList<UserDto>> GetAllUsersAsync()
     {
         var users = _userManager.Users.ToList();
@@ -66,12 +78,15 @@ public class UserService : IUserService
         return list;
     }
 
+    /// <summary>
+    /// Updates an existing user and their roles.
+    /// </summary>
     public async Task<UserDto?> UpdateUserAsync(string id, UpdateUserDto dto)
     {
         var user = await _userManager.FindByIdAsync(id);
         if (user == null) return null;
 
-        // Uppdatera användarens grunddata
+        // Update user's basic information
         user.FirstName = dto.FirstName;
         user.LastName = dto.LastName;
         user.Email = dto.Email;
@@ -81,14 +96,14 @@ public class UserService : IUserService
         if (!result.Succeeded)
             throw new Exception(string.Join(", ", result.Errors.Select(e => e.Description)));
 
-        // Uppdatera roller
+        // Update roles
         var currentRoles = await _userManager.GetRolesAsync(user);
 
-        // Ta bort alla gamla roller
+        // Remove all old roles
         if (currentRoles.Any())
             await _userManager.RemoveFromRolesAsync(user, currentRoles);
 
-        // Lägg till nya roller från DTO
+        // Add new roles from DTO
         foreach (var role in dto.Roles)
         {
             if (!await _roleManager.RoleExistsAsync(role))
@@ -104,17 +119,18 @@ public class UserService : IUserService
             LastName = user.LastName,
             Email = user.Email!,
             Roles = (await _userManager.GetRolesAsync(user)).ToList()
-
         };
     }
 
+    // /// <summary>
+    // /// Deletes a user by ID.
+    // /// </summary>
     // public async Task<bool> DeleteUserAsync(string id)
     // {
     //     var user = await _userManager.FindByIdAsync(id);
     //     if (user == null) return false;
-
+    //
     //     var result = await _userManager.DeleteAsync(user);
     //     return result.Succeeded;
     // }
-
 }

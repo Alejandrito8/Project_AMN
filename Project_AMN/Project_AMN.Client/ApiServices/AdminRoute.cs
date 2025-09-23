@@ -3,15 +3,24 @@ using Project_AMN.Shared.DTO;
 
 namespace Project_AMN.Client.Services;
 
+/// <summary>
+/// Provides administrative functions for managing users via HTTP API.
+/// </summary>
 public class AdminService
 {
     private readonly HttpClient _http;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AdminService"/> class.
+    /// </summary>
     public AdminService(HttpClient http)
     {
         _http = http;
     }
 
+    /// <summary>
+    /// Retrieves all users from the admin API.
+    /// </summary>
     public async Task<List<UserDto>> GetAllUsersAsync()
     {
         var response = await _http.GetAsync("/api/admin/users");
@@ -29,6 +38,9 @@ public class AdminService
         return new List<UserDto>();
     }
 
+    /// <summary>
+    /// Creates a new user via the admin API.
+    /// </summary>
     public async Task<UserDto?> CreateUserAsync(CreateUserDto dto)
     {
         var response = await _http.PostAsJsonAsync("/api/admin/users", dto);
@@ -42,6 +54,10 @@ public class AdminService
         Console.WriteLine($"Error with creating User: {error}");
         return null;
     }
+
+    /// <summary>
+    /// Updates an existing user via the admin API.
+    /// </summary>
     public async Task<UserDto?> UpdateUserAsync(string id, UpdateUserDto dto)
     {
         var response = await _http.PutAsJsonAsync($"/api/admin/users/{id}", dto);
@@ -55,6 +71,10 @@ public class AdminService
         Console.WriteLine($"Error with updating User: {error}");
         return null;
     }
+
+    /// <summary>
+    /// Deletes a user via the admin API.
+    /// </summary>
     public async Task<bool> DeleteUserAsync(string id)
     {
         var response = await _http.DeleteAsync($"/api/admin/users/{id}");

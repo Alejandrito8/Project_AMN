@@ -1,5 +1,6 @@
 @page "/commerceAdmin"
 @using Microsoft.AspNetCore.Authorization
+@using Project_AMN.Client.ApiServices
 @using Project_AMN.Client.Services
 @using Project_AMN.Shared.DTO
 @using Project_AMN.Shared.Models
@@ -27,12 +28,12 @@
     </NotAuthorized>
 </AuthorizeView>
 
-<!-- GRID LAYOUT -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <!-- ARTICLES SECTION -->
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Articles</h3>
 
+        <!-- CREATE NEW ARTICLE -->
         <div class="space-y-2 mb-4">
             <input placeholder="Name" @bind="newArticle.Name" class="border p-2 w-full rounded" />
             <input placeholder="SKU" @bind="newArticle.SKU" class="border p-2 w-full rounded" />
@@ -46,15 +47,12 @@
             </button>
         </div>
 
-        <h4 class="font-semibold mb-2">Existing Articles</h4>
-
-        <!-- Search + Filter UI for Articles -->
-        <!-- 🔎 Search + Filter UI for Articles -->
+        <!-- SEARCH & FILTER -->
         <div class="mb-3 flex gap-2">
             <input type="text"
-                @bind="searchText"
-                placeholder="Search by name, SKU, or location..."
-                class="form-control flex-1 border p-2 rounded" />
+                   @bind="searchText"
+                   placeholder="Search by name, SKU, or location..."
+                   class="form-control flex-1 border p-2 rounded" />
             <select @bind="stockFilter" class="form-select border p-2 rounded">
                 <option value="">All Stock</option>
                 <option value="in">In Stock</option>
@@ -62,7 +60,7 @@
             </select>
         </div>
 
-
+        <!-- EXISTING ARTICLES -->
         @if (articles == null || !articles.Any())
         {
             <p class="text-gray-500 italic">No articles found.</p>
@@ -89,6 +87,7 @@
             </ul>
         }
 
+        <!-- EDIT ARTICLE MODAL -->
         @if (editingArticle != null)
         {
             <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -111,6 +110,7 @@
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Orders</h3>
 
+        <!-- SEARCH & FILTER ORDERS -->
         <div class="space-y-2 mb-4">
             <input placeholder="Search by OrderId or Customer" 
                    @bind="orderSearchText" 
@@ -123,7 +123,7 @@
                 <option value="Canceled">Canceled</option>
             </select>
         </div>
-        
+
         @if (orders == null || !orders.Any())
         {
             <p class="text-gray-500 italic">No orders available.</p>
@@ -162,11 +162,10 @@
 
 @code {
     private ArticleCreateDto newArticle = new();
-    private List<ArticleResultDto> articles = new(); 
+    private List<ArticleResultDto> articles = new();
     private ArticleResultDto? editingArticle;
     private ArticleUpdateDto editingArticleDto = new ArticleUpdateDto();
 
-    // 🔎 Article search + filter state
     private string searchText = string.Empty;
     private string stockFilter = string.Empty;
 
@@ -217,15 +216,39 @@
 
     private async Task CreateArticle()
     {
-        if (string.IsNullOrWhiteSpace(newArticle.Name) ||
-            string.IsNullOrWhiteSpace(newArticle.SKU) ||
-            newArticle.Price <= 0 ||
-            newArticle.Stock < 0)
+        if (string.IsNullOrWhiteSpace(newArticle.Name))
+            return;
+
+        if (string.IsNullOrWhiteSpace(newArticle.SKU))
+        {
+            newArticle.SKU = GenerateUniqueSku();
+        }
+        else if (articles.Any(a => a.SKU == newArticle.SKU))
+        {
+            inboundMessage = $"The SKU '{newArticle.SKU}' is already in use.";
+            return;
+        }
+
+        if (newArticle.Price <= 0 || newArticle.Stock < 0)
             return;
 
         await ArticleService.CreateArticleAsync(newArticle);
         await LoadArticlesAsync();
         newArticle = new ArticleCreateDto();
+    }
+
+    private string GenerateUniqueSku()
+    {
+        string sku;
+        do
+        {
+            var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            var randomPart = Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
+            sku = $"ART-{timestamp}-{randomPart}";
+        }
+        while (articles.Any(a => a.SKU == sku));
+
+        return sku;
     }
 
     private async Task DeleteArticle(int id)
@@ -303,8 +326,9 @@
             else
             {
                 inboundMessage = $"Inbound registered successfully! New stock for '{updatedArticle.Name}' (SKU: {updatedArticle.SKU}): {updatedArticle.Stock}";
-                await LoadArticlesAsync(); 
+                await LoadArticlesAsync();
             }
+
             inboundSku = string.Empty;
             inboundQuantity = 0;
         }

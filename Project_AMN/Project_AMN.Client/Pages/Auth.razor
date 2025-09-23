@@ -5,7 +5,6 @@
 @using Project_AMN.Shared.DTO
 @inject AdminService AdminService
 
-
 @attribute [Authorize]
 
 <PageTitle>Admin Panel</PageTitle>
@@ -54,12 +53,10 @@
                 </div>
                 <div class="flex flex-col space-y-2">
                     <button class="bg-yellow-500 text-black p-1 ml-3 rounded" @onclick="() => EditUser(user)">Edit</button>
-                    <button class="bg-red-500 text-black p-1 ml-2 rounded"
-                        @onclick="() => DeleteUser(user.Id!)">Delete</button>
+                    <button class="bg-red-500 text-black p-1 ml-2 rounded" @onclick="() => DeleteUser(user.Id!)">Delete</button>
                 </div>
             </div>
         }
-
     }
 </div>
 
@@ -83,25 +80,57 @@
         </div>
     </div>
 }
+
 @code {
+    /// <summary>
+    /// List of all users.
+    /// </summary>
     private List<UserDto> users = new();
+
+    /// <summary>
+    /// DTO for creating a new user.
+    /// </summary>
     private CreateUserDto newUser = new() { Role = "User" };
+
+    /// <summary>
+    /// DTO for editing an existing user.
+    /// </summary>
     private UpdateUserDto? editingUser;
+
+    /// <summary>
+    /// Password confirmation field for new user creation.
+    /// </summary>
     private string confirmPassword = "";
+
+    /// <summary>
+    /// Id of the user currently being edited.
+    /// </summary>
     private string? editingUserId;
+
+    /// <summary>
+    /// Selected role when editing a user.
+    /// </summary>
     private string selectedRole = "User";
 
-
+    /// <summary>
+    /// Component initialization: fetch all users.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await GetAllUsers();
     }
 
+    /// <summary>
+    /// Retrieves all users via AdminService.
+    /// </summary>
     private async Task GetAllUsers()
     {
         users = await AdminService.GetAllUsersAsync();
     }
 
+    /// <summary>
+    /// Creates a new user using AdminService.
+    /// </summary>
     private async Task CreateUser()
     {
         if (newUser.Password != confirmPassword)
@@ -117,6 +146,9 @@
         }
     }
 
+    /// <summary>
+    /// Sets up the editingUser object for editing a specific user.
+    /// </summary>
     private void EditUser(UserDto user)
     {
         editingUser = new UpdateUserDto
@@ -131,9 +163,14 @@
         selectedRole = user.Roles.FirstOrDefault() ?? "User";
     }
 
-
+    /// <summary>
+    /// Cancels editing a user.
+    /// </summary>
     private void CancelEdit() => editingUser = null;
 
+    /// <summary>
+    /// Saves the changes made to a user via AdminService.
+    /// </summary>
     private async Task SaveEdit()
     {
         if (editingUser is null || string.IsNullOrWhiteSpace(editingUserId))
@@ -156,6 +193,9 @@
         }
     }
 
+    /// <summary>
+    /// Deletes a user by Id using AdminService.
+    /// </summary>
     private async Task DeleteUser(string userId)
     {
         var success = await AdminService.DeleteUserAsync(userId);
@@ -165,6 +205,9 @@
         }
     }
 
+    /// <summary>
+    /// Returns the text for the create button based on the selected role.
+    /// </summary>
     private string GetCreateButtonText()
     {
         return string.IsNullOrWhiteSpace(newUser.Role) ? "Create User" : $"Create {newUser.Role}";

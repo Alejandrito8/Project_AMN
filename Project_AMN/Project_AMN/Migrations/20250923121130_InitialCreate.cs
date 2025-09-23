@@ -192,6 +192,34 @@ namespace Project_AMN.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "OrderItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ArticleId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Quantity = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrderPrice = table.Column<decimal>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "OrderId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -228,14 +256,21 @@ namespace Project_AMN.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_ArticleId",
+                table: "OrderItems",
+                column: "ArticleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
+                column: "OrderId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Articles");
-
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
@@ -252,13 +287,19 @@ namespace Project_AMN.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Articles");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
         }
     }
 }
