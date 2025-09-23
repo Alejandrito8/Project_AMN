@@ -48,48 +48,62 @@
 
         <h4 class="font-semibold mb-2">Existing Articles</h4>
 
+        <!-- Search + Filter UI for Articles -->
+        <!-- 🔎 Search + Filter UI for Articles -->
+        <div class="mb-3 flex gap-2">
+            <input type="text"
+                @bind="searchText"
+                placeholder="Search by name, SKU, or location..."
+                class="form-control flex-1 border p-2 rounded" />
+            <select @bind="stockFilter" class="form-select border p-2 rounded">
+                <option value="">All Stock</option>
+                <option value="in">In Stock</option>
+                <option value="out">Out of Stock</option>
+            </select>
+        </div>
+
+
         @if (articles == null || !articles.Any())
         {
             <p class="text-gray-500 italic">No articles found.</p>
         }
         else
         {
-<ul class="list-disc list-inside max-h-64 overflow-y-auto space-y-1">
-    @foreach (var article in articles)
-    {
-        <li class="flex justify-between items-center">
-            <span>@article.Name (@article.SKU) - Stock: @article.Stock - Price: @article.Price</span>
-            <div class="flex space-x-2">
-                <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded"
-                        @onclick="() => EditArticle(article)">
-                    Edit
-                </button>
-                <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
-                        @onclick="() => DeleteArticle(article.Id)">
-                    Delete
-                </button>
-            </div>
-        </li>
-    }
-</ul>
-@if (editingArticle != null)
-{
-    <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-        <div class="bg-white p-4 rounded shadow w-1/3">
-            <h4>Edit Article</h4>
-            <input placeholder="Name" @bind="editingArticleDto.Name" class="border p-1 mb-2 w-full" />
-            <input type="number" placeholder="Price" @bind="editingArticleDto.Price" min="0.01" step="0.01" class="border p-1 mb-2 w-full" />
-            <input type="number" placeholder="Stock" @bind="editingArticleDto.Stock" min="0" step="1" class="border p-1 mb-2 w-full" />
-            <input placeholder="Location" @bind="editingArticleDto.Location" class="border p-1 mb-2 w-full" />
-            <div class="flex justify-end space-x-2">
-                <button class="bg-gray-500 text-white p-1 rounded" @onclick="CancelEditArticle">Cancel</button>
-                <button class="bg-green-500 text-white p-1 rounded" @onclick="SaveEditArticle">Save</button>
-            </div>
-        </div>
-    </div>
-}
+            <ul class="list-disc list-inside max-h-64 overflow-y-auto space-y-1">
+                @foreach (var article in FilteredArticles)
+                {
+                    <li class="flex justify-between items-center">
+                        <span>@article.Name (@article.SKU) - Stock: @article.Stock - Price: @article.Price</span>
+                        <div class="flex space-x-2">
+                            <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded"
+                                    @onclick="() => EditArticle(article)">
+                                Edit
+                            </button>
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                                    @onclick="() => DeleteArticle(article.Id)">
+                                Delete
+                            </button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
 
-
+        @if (editingArticle != null)
+        {
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+                <div class="bg-white p-4 rounded shadow w-1/3">
+                    <h4>Edit Article</h4>
+                    <input placeholder="Name" @bind="editingArticleDto.Name" class="border p-1 mb-2 w-full" />
+                    <input type="number" placeholder="Price" @bind="editingArticleDto.Price" min="0.01" step="0.01" class="border p-1 mb-2 w-full" />
+                    <input type="number" placeholder="Stock" @bind="editingArticleDto.Stock" min="0" step="1" class="border p-1 mb-2 w-full" />
+                    <input placeholder="Location" @bind="editingArticleDto.Location" class="border p-1 mb-2 w-full" />
+                    <div class="flex justify-end space-x-2">
+                        <button class="bg-gray-500 text-white p-1 rounded" @onclick="CancelEditArticle">Cancel</button>
+                        <button class="bg-green-500 text-white p-1 rounded" @onclick="SaveEditArticle">Save</button>
+                    </div>
+                </div>
+            </div>
         }
     </div>
 
@@ -97,6 +111,19 @@
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Orders</h3>
 
+        <div class="space-y-2 mb-4">
+            <input placeholder="Search by OrderId or Customer" 
+                   @bind="orderSearchText" 
+                   class="border p-2 w-full rounded" />
+
+            <select @bind="orderStatusFilter" class="border p-2 w-full rounded">
+                <option value="">All Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="Completed">Completed</option>
+                <option value="Canceled">Canceled</option>
+            </select>
+        </div>
+        
         @if (orders == null || !orders.Any())
         {
             <p class="text-gray-500 italic">No orders available.</p>
@@ -104,7 +131,7 @@
         else
         {
             <ul class="list-disc list-inside max-h-64 overflow-y-auto space-y-1">
-                @foreach (var order in orders)
+                @foreach (var order in FilterOrders)
                 {
                     <li>@order</li>
                 }
@@ -138,7 +165,35 @@
     private List<ArticleResultDto> articles = new(); 
     private ArticleResultDto? editingArticle;
     private ArticleUpdateDto editingArticleDto = new ArticleUpdateDto();
+
+    // 🔎 Article search + filter state
+    private string searchText = string.Empty;
+    private string stockFilter = string.Empty;
+
+    private IEnumerable<ArticleResultDto> FilteredArticles =>
+        articles.Where(a =>
+            (string.IsNullOrWhiteSpace(searchText) ||
+             a.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+             a.SKU.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+             a.Location.Contains(searchText, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(stockFilter) ||
+             (stockFilter == "in" && a.Stock > 0) ||
+             (stockFilter == "out" && a.Stock == 0))
+        );
+
+    // Orders
     private List<string> orders = new();
+    private string orderSearchText = string.Empty;
+    private string orderStatusFilter = string.Empty;
+
+    private IEnumerable<string> FilterOrders =>
+        orders.Where(o =>
+            (string.IsNullOrWhiteSpace(orderSearchText) ||
+             o.Contains(orderSearchText, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(orderStatusFilter) ||
+             o.Contains(orderStatusFilter, StringComparison.OrdinalIgnoreCase))
+        );
+
     private string inboundSku = string.Empty;
     private int inboundQuantity;
     private string inboundMessage = string.Empty;
@@ -146,7 +201,12 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadArticlesAsync();
-        orders = new List<string>();
+        orders = new List<string>
+        {
+            "OrderId: 1 | Customer: John Doe | Status: Pending",
+            "OrderId: 2 | Customer: Jane Smith | Status: Completed",
+            "OrderId: 3 | Customer: Alice | Status: Canceled"
+        };
     }
 
     private async Task LoadArticlesAsync()
@@ -174,89 +234,83 @@
         await LoadArticlesAsync();
     }
 
-private void EditArticle(ArticleResultDto article)
-{
-    editingArticle = article;
-    editingArticleDto = new ArticleUpdateDto
+    private void EditArticle(ArticleResultDto article)
     {
-        Name = article.Name,
-        Price = article.Price,
-        Stock = article.Stock,
-        Location = article.Location
-    };
-}
-
-private void CancelEditArticle()
-{
-    editingArticle = null;
-    editingArticleDto = new ArticleUpdateDto();
-}
-
-private async Task SaveEditArticle()
-{
-    if (editingArticle == null)
-        return;
-
-    // Frontend-validering
-    if (editingArticleDto.Price <= 0)
-    {
-        inboundMessage = "Price must be greater than 0.";
-        return;
-    }
-
-    if (editingArticleDto.Stock < 0)
-    {
-        inboundMessage = "Stock cannot be negative.";
-        return;
-    }
-
-    var updatedArticle = await ArticleService.UpdateArticleAsync(editingArticleDto, editingArticle.SKU);
-
-    if (updatedArticle != null)
-    {
-        var index = articles.FindIndex(a => a.SKU == editingArticle.SKU);
-        if (index != -1)
-            articles[index] = updatedArticle;
-
-        inboundMessage = $"Article '{updatedArticle.Name}' updated successfully!";
-        CancelEditArticle();
-    }
-}
-
-
-
-
-private async Task RegisterInbound()
-{
-    inboundMessage = string.Empty;
-
-    if (string.IsNullOrWhiteSpace(inboundSku) || inboundQuantity <= 0)
-    {
-        inboundMessage = "Please enter a valid SKU and quantity greater than 0.";
-        return;
-    }
-
-    try
-    {
-        var updatedArticle = await InboundService.RegisterInboundAsync(inboundSku, inboundQuantity);
-
-        if (updatedArticle is null)
+        editingArticle = article;
+        editingArticleDto = new ArticleUpdateDto
         {
-            inboundMessage = $"Article with SKU '{inboundSku}' not found.";
-        }
-        else
-        {
-            inboundMessage = $"Inbound registered successfully! New stock for '{updatedArticle.Name}' (SKU: {updatedArticle.SKU}): {updatedArticle.Stock}";
-            await LoadArticlesAsync(); 
-        }
-        inboundSku = string.Empty;
-        inboundQuantity = 0;
+            Name = article.Name,
+            Price = article.Price,
+            Stock = article.Stock,
+            Location = article.Location
+        };
     }
-    catch (Exception ex)
+
+    private void CancelEditArticle()
     {
-        inboundMessage = $"Error registering inbound: {ex.Message}";
+        editingArticle = null;
+        editingArticleDto = new ArticleUpdateDto();
     }
-}
 
+    private async Task SaveEditArticle()
+    {
+        if (editingArticle == null)
+            return;
 
+        if (editingArticleDto.Price <= 0)
+        {
+            inboundMessage = "Price must be greater than 0.";
+            return;
+        }
+
+        if (editingArticleDto.Stock < 0)
+        {
+            inboundMessage = "Stock cannot be negative.";
+            return;
+        }
+
+        var updatedArticle = await ArticleService.UpdateArticleAsync(editingArticleDto, editingArticle.SKU);
+
+        if (updatedArticle != null)
+        {
+            var index = articles.FindIndex(a => a.SKU == editingArticle.SKU);
+            if (index != -1)
+                articles[index] = updatedArticle;
+
+            inboundMessage = $"Article '{updatedArticle.Name}' updated successfully!";
+            CancelEditArticle();
+        }
+    }
+
+    private async Task RegisterInbound()
+    {
+        inboundMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(inboundSku) || inboundQuantity <= 0)
+        {
+            inboundMessage = "Please enter a valid SKU and quantity greater than 0.";
+            return;
+        }
+
+        try
+        {
+            var updatedArticle = await InboundService.RegisterInboundAsync(inboundSku, inboundQuantity);
+
+            if (updatedArticle is null)
+            {
+                inboundMessage = $"Article with SKU '{inboundSku}' not found.";
+            }
+            else
+            {
+                inboundMessage = $"Inbound registered successfully! New stock for '{updatedArticle.Name}' (SKU: {updatedArticle.SKU}): {updatedArticle.Stock}";
+                await LoadArticlesAsync(); 
+            }
+            inboundSku = string.Empty;
+            inboundQuantity = 0;
+        }
+        catch (Exception ex)
+        {
+            inboundMessage = $"Error registering inbound: {ex.Message}";
+        }
+    }
 }
