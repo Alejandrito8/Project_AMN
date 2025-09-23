@@ -1,72 +1,50 @@
 namespace Project_AMN.ApiRoutes;
-
 public static class OrderEndpoints
 {
     public static IEndpointRouteBuilder MapOrderEndpoints(this IEndpointRouteBuilder app)
     {
-        // // GET 
-        app.MapGet("/api/orders", async (IMediator mediator) =>
-        {
-            var orders = await mediator.Send(new ListOrderQuery());
-            return Results.Ok(orders);
-        });
-        
-        // app.MapGet("/api/orders/{orderId:int}", async (int orderId, IMediator mediator) =>
-        // {
-        //     var order = await mediator.Send(new GetOrderByIdQuery(orderId));
-        //     return order is null ? Results.NotFound($"Order with ID {orderId} not found.") : Results.Ok(order);
-        // });
+        app.MapGet("/api/orders", async (IOrderService service) =>
+            Results.Ok(await service.GetAllOrdersAsync()));
 
-        // POST
-        app.MapPost("/api/orders", async (CreateOrderCommand orderCommand, IMediator mediator) =>
+        app.MapGet("/api/orders/{orderId}", async (int orderId, IOrderService service) =>
         {
-            var order = await mediator.Send(orderCommand);
+            var order = await service.GetOrderByIdAsync(orderId);
             return order is null ? Results.NotFound() : Results.Ok(order);
         });
 
-        // PUT
-        app.MapPut("/api/orders/{orderId:int}/status", async (
-                   int orderId,
-                   UpdateOrderStatusCommand request,
-                   IMediator mediator) =>
-               {
-                   var command = new UpdateOrderStatusCommand(orderId);
-                   var updated = await mediator.Send(command);
-                   return updated is null ? Results.NotFound($"Order with ID {orderId} not found.") : Results.Ok(updated);
-               });
+        app.MapPost("/api/orders", async (OrderCreateDto dto, IOrderService service) =>
+            Results.Ok(await service.CreateOrderAsync(dto)));
 
-        // DELETE
-        app.MapDelete("/api/orders/{orderId:int}", async (int orderId, IMediator mediator) =>
+        app.MapPut("/api/orders/{orderId}/status", async (int orderId, IOrderService service) =>
         {
-            var deleted = await mediator.Send(new DeleteOrderCommand(orderId));
-            return deleted
-                ? Results.NoContent()
-                : Results.NotFound($"Order with ID {orderId} not found.");
+            var updated = await service.UpdateOrderStatusAsync(orderId);
+            return updated is null ? Results.NotFound() : Results.Ok(updated);
         });
 
-        app.MapGet("/orders/export", async (HttpResponse response, ApplicationDbContext db) =>
+        app.MapDelete("/api/orders/{orderId}", async (int orderId, IOrderService service) =>
         {
-            var orders = await db.Orders.ToListAsync();
-            var fileBytes = ExportService.ExportOrders(orders);
-
-            response.ContentType = "text/csv";
-            response.Headers.Add("Content-Disposition", "attachment; filename=orders.csv");
-            await response.Body.WriteAsync(fileBytes);
+            var deleted = await service.DeleteOrderAsync(orderId);
+            return deleted ? Results.NoContent() : Results.NotFound();
         });
 
-        app.MapGet("/api/orders/search", async (
-            [AsParameters] OrderSearchRequest request,
-            IOrderService service) =>
+        app.MapPost("/api/orders/{orderId}/items", async (int orderId, OrderItemCreateDto dto, IOrderService service) =>
+        {
+            var addedItem = await service.AddItemToOrderAsync(orderId, dto.ArticleId, dto.Quantity, dto.OrderPrice);
+            return addedItem is null ? Results.NotFound() : Results.Ok(addedItem);
+        });
+
+        app.MapGet("/api/orders/{orderId}/items", async (int orderId, IOrderService service) =>
+        {
+            var items = await service.GetOrderItemsAsync(orderId);
+            return items.Any() ? Results.Ok(items) : Results.NotFound();
+        });
+
+        app.MapGet("/api/orders/search", async ([AsParameters] OrderSearchRequest request, IOrderService service) =>
         {
             var results = await service.SearchOrdersAsync(request.Status, request.FromDate, request.ToDate);
-
-            if (!results.Any())
-                return Results.NotFound("No matching orders found.");
-            return Results.Ok(results);
+            return results.Any() ? Results.Ok(results) : Results.NotFound();
         });
+
         return app;
-
-
-
     }
 }

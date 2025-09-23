@@ -1,19 +1,143 @@
-@page   "/orders"
-<PageTitle>Order</PageTitle>
-<h1>Order</h1>
-<p>This is the Order page.</p>
-<p>Here you can place your orders.</p>
+@page "/orders"
+@using Project_AMN.Client.Services
+@using Project_AMN.Shared.DTO
+@inject OrderService OrderService
+@inject ArticleService ArticleService
 
-<div class="container container-padding" style="display: flex; justify-content: center;">
-    <div class="order-placeholder">
-        <!-- Här kommer API-orders dyka upp senare -->
+<h3 class="mb-4">Create Your Order</h3>
 
-
-        
-    </div>
+<div class="mb-4">
+    <label class="form-label">Shipping Address:</label>
+    <input type="text" placeholder="Enter your shipping address" @bind="shippingAddress" class="form-control" />
 </div>
 
+<h4 class="mb-3">Available Articles</h4>
+<div class="row">
+    @foreach (var article in articles)
+    {
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">@article.Name</h5>
+                    <p class="card-text mb-1">Price: <strong>@article.Price kr</strong></p>
+                    <p class="card-text mb-3">
+                        Stock: 
+                        @if(article.Stock > 5)
+                        {
+                            <span class="badge bg-success">@article.Stock</span>
+                        }
+                        else if(article.Stock > 0)
+                        {
+                            <span class="badge bg-warning text-dark">@article.Stock</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Out of Stock</span>
+                        }
+                    </p>
+                    <button class="btn btn-primary mt-auto" @onclick="() => AddToCart(article)" disabled="@(!CanAddToCart(article))">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<h4 class="mt-5">Your Cart</h4>
+@if (cart.Any())
+{
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th style="width: 120px;">Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in cart)
+                {
+                    <tr>
+                        <td>@item.Name</td>
+                        <td>@item.Price kr</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm w-100" @onclick="() => RemoveFromCart(item)">Remove</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <p class="fw-bold fs-5">Total Amount: @cart.Sum(i => i.Price) kr</p>
+    <button class="btn btn-success btn-lg" @onclick="CreateOrder">Place Order</button>
+}
+else
+{
+    <p class="text-muted">Your cart is empty. Add some articles to create an order.</p>
+}
+
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success mt-3">@successMessage</div>
+}
+
 @code {
-    // Lista för ordrar från API senare
-    List<object> orders = new List<object>();
+    private List<ArticleResultDto> articles = new();
+    private List<ArticleResultDto> cart = new();
+    private string shippingAddress = string.Empty;
+    private string successMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allArticles = await ArticleService.GetAllArticlesAsync();
+        articles = allArticles.Where(a => a != null).Select(a => a!).ToList();
+    }
+
+    private bool CanAddToCart(ArticleResultDto article)
+    {
+        return article.Stock > 0 && !cart.Any(i => i.Id == article.Id);
+    }
+
+    private void AddToCart(ArticleResultDto article)
+    {
+        if (!CanAddToCart(article)) return;
+        cart.Add(article);
+    }
+
+    private void RemoveFromCart(ArticleResultDto item)
+    {
+        cart.Remove(item);
+    }
+
+    private async Task CreateOrder()
+    {
+        if (!cart.Any() || string.IsNullOrWhiteSpace(shippingAddress)) return;
+
+        var orderDto = new OrderCreateDto
+        {
+            ShippingAddress = shippingAddress,
+            TotalAmount = cart.Sum(a => a.Price),
+            Items = cart.Select(a => new OrderItemCreateDto
+            {
+                ArticleId = a.Id,
+                Quantity = 1,
+                OrderPrice = a.Price
+            }).ToList()
+        };
+
+        var createdOrder = await OrderService.CreateOrderAsync(orderDto);
+
+        if (createdOrder != null)
+        {
+            successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
+            cart.Clear();
+            shippingAddress = string.Empty;
+        }
+        else
+        {
+            successMessage = "Error creating order. Please try again.";
+        }
+    }
 }

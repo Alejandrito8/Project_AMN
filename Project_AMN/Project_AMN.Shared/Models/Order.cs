@@ -8,5 +8,6 @@ namespace Project_AMN.Shared.Models
         public decimal TotalAmount { get; set; }
         public string ShippingAddress { get; set; } = "";
         public string? TrackingNumber { get; set; }
+        public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
     }
 }
