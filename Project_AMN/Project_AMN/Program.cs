@@ -1,11 +1,19 @@
 using Project_AMN.Handlers;
 
+/// <summary>
+/// Main entry point for the application.
+/// Configures services, middleware, endpoints, and initializes roles/admin.
+/// </summary>
 var builder = WebApplication.CreateBuilder(args);
 
-// HttpClient
+/// <summary>
+/// Add HttpClient support.
+/// </summary>
 builder.Services.AddHttpClient();
 
-// MediatR
+/// <summary>
+/// Configure MediatR handlers.
+/// </summary>
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(CreateOrderHandler).Assembly);
@@ -15,17 +23,23 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(UpdateUserHandler).Assembly);
 });
 
-// Blazor Components
+/// <summary>
+/// Configure Blazor Components.
+/// </summary>
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// Authentication & Authorization
+/// <summary>
+/// Configure Authentication & Authorization.
+/// </summary>
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
 
-// Only allow Admins to access certain endpoints
+/// <summary>
+/// Configure authorization policies.
+/// </summary>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
@@ -33,29 +47,37 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UserOnly", policy => policy.RequireRole("User"));
 });
 
-// Full Identity
+/// <summary>
+/// Configure full ASP.NET Core Identity.
+/// </summary>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = false; // ingen mailbekräftelse
+    options.SignIn.RequireConfirmedAccount = false; // No email confirmation required
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddSignInManager()
 .AddDefaultTokenProviders();
 
-// Database
+/// <summary>
+/// Configure database.
+/// </summary>
 var connectionString = "Data Source=ProjectAMN.db";
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Tjänster
+/// <summary>
+/// Register application services.
+/// </summary>
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IInboundService, InboundService>();
 builder.Services.AddScoped<IArticleService, ArticleService>();
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Swagger
+/// <summary>
+/// Configure Swagger.
+/// </summary>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -63,7 +85,9 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+/// <summary>
+/// Configure the HTTP request pipeline.
+/// </summary>
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -85,33 +109,42 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseAntiforgery();
 
-// Map Endpoints
+/// <summary>
+/// Map API endpoints.
+/// </summary>
 app.MapOrderEndpoints();
 app.MapInboundEndpoints();
 app.MapArticleEndpoints();
 app.MapAdminEndpoints();
 
-// Razor Components
+/// <summary>
+/// Map Razor Components.
+/// </summary>
 app.MapRazorComponents<App>()
    .AddInteractiveWebAssemblyRenderMode()
    .AddAdditionalAssemblies(typeof(Project_AMN.Client._Imports).Assembly);
 
-
-// Identity endpoints
+/// <summary>
+/// Map additional identity endpoints.
+/// </summary>
 app.MapAdditionalIdentityEndpoints();
 
-// Skapa roller och admin
+/// <summary>
+/// Initialize roles and create admin user if not exists.
+/// </summary>
 await InitializeRolesAndAdmin(app);
 
 app.Run();
 
-
+/// <summary>
+/// Creates required roles and an admin user if they do not exist.
+/// </summary>
 async Task InitializeRolesAndAdmin(WebApplication app)
 {
     using var scope = app.Services.CreateScope();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
- 
+
     var roles = new[] { "Admin", "User" };
     foreach (var role in roles)
     {
@@ -120,10 +153,10 @@ async Task InitializeRolesAndAdmin(WebApplication app)
             await roleManager.CreateAsync(new IdentityRole(role));
         }
     }
- 
+
     string email = "admin@admin.se";
     string password = "Abc123!";
- 
+
     if (await userManager.FindByEmailAsync(email) == null)
     {
         var user = new ApplicationUser { UserName = email, Email = email };
