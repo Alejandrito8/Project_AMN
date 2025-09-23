@@ -8,8 +8,19 @@
 <h3 class="mb-4">Create Your Order</h3>
  
 <h4 class="mb-3">Available Articles</h4>
+
+<!-- Search and Stock Filter -->
+<div class="mb-3 d-flex gap-2">
+    <input type="text" @bind="searchText" placeholder="Search by name, SKU, or location..." class="form-control" />
+    <select @bind="stockFilter" class="form-select">
+        <option value="">All Stock</option>
+        <option value="in">In Stock</option>
+        <option value="out">Out of Stock</option>
+    </select>
+</div>
+
 <div class="row">
-    @foreach (var article in articles)
+    @foreach (var article in FilteredArticles)
     {
         <div class="col-md-4 mb-3">
             <div class="card h-100 shadow-sm">
@@ -109,7 +120,10 @@ else
  
     private List<CartItem> cart = new();
     private string successMessage = string.Empty;
- 
+
+    private string searchText = string.Empty;
+    private string stockFilter = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         var allArticles = await ArticleService.GetAllArticlesAsync();
@@ -202,6 +216,18 @@ else
             successMessage = "Error creating order. Please try again.";
         }
     }
+
+    // Filtered articles based on search and stock
+    private IEnumerable<ArticleResultDto> FilteredArticles =>
+        articles.Where(a =>
+            (string.IsNullOrWhiteSpace(searchText) ||
+             a.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+             a.SKU.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+             a.Location.Contains(searchText, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(stockFilter) ||
+             (stockFilter == "in" && a.Stock > 0) ||
+             (stockFilter == "out" && a.Stock == 0))
+        );
 }
  
  
