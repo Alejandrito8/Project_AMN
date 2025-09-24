@@ -19,16 +19,6 @@ public static class ArticleEndpoints
             return Results.Ok(articles);
         });
 
-
-        // /// <summary>
-        // /// Retrieves a single article by ID.
-        // /// </summary>
-        // app.MapGet("/api/articles/{id:int}", async (int id, IMediator mediator) =>
-        // {
-        //     var article = await mediator.Send(new GetArticleByIdQuery(id));
-        //     return article is null ? Results.NotFound($"Article with ID {id} not found.") : Results.Ok(article);
-        // });
-
         /// <summary>
         /// Creates a new article.
         /// </summary>

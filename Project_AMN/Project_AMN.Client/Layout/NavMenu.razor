@@ -23,7 +23,7 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Orders
             </NavLink>
         </div>
-@* 
+        @* 
       <AuthorizeView Roles="Admin">
     <Authorized> *@
         <div class="nav-item px-3">
@@ -36,10 +36,8 @@
                 <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Admin Panel
             </NavLink>
         </div>
-    @* </Authorized>
+        @* </Authorized>
 </AuthorizeView> *@
-
-        
 
         <AuthorizeView>
             <Authorized>
@@ -74,7 +72,6 @@
     </nav>
 </div>
 
-
 @code {
     private string? currentUrl;
 
@@ -95,4 +92,3 @@
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }
-

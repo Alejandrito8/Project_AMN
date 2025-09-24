@@ -28,15 +28,6 @@ public class ArticleRoute
         return articles ?? new List<ArticleResultDto?>();
     }
 
-    // /// <summary>
-    // /// Retrieves an article by its ID.
-    // /// </summary>
-    // public async Task<ArticleResultDto?> GetArticleByIdAsync(int id)
-    // {
-    //     var article = await _http.GetFromJsonAsync<ArticleResultDto?>($"/api/articles/{id}");
-    //     return article;
-    // }
-
     /// <summary>
     /// Creates a new article via the API.
     /// </summary>

@@ -1,5 +1,3 @@
-
-
 namespace Project_AMN.Handler;
 
 public class CreateArticleHandler : IRequestHandler<CreateArticleCommand, ArticleResultDto?>

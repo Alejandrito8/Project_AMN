@@ -85,7 +85,6 @@ public static class OrderEndpoints
             return results.Any() ? Results.Ok(results) : Results.NotFound();
         });
 
-
         /// <summary>
         /// Exports all orders to a CSV file.
         /// </summary>
@@ -102,4 +101,3 @@ public static class OrderEndpoints
         return app;
     }
 }
-
