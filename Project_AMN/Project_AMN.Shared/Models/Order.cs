@@ -20,7 +20,7 @@ namespace Project_AMN.Shared.Models
         /// Gets or sets the current status of the order.
         /// Examples: "Created", "Sent", "Delivered", "Cancelled".
         /// </summary>
-        public string Status { get; set; } = "Created";
+        public OrderStatus Status { get; set; } = OrderStatus.Created;
 
         /// <summary>
         /// Gets or sets the total amount of the order.
@@ -41,5 +41,14 @@ namespace Project_AMN.Shared.Models
         /// Gets or sets the collection of items included in the order.
         /// </summary>
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
+    }
+
+        public enum OrderStatus
+    {
+        Created = 0,
+        Sent = 1,
+        Delivered = 2,
+        Cancelled = 3,
+        Completed = 4
     }
 }
