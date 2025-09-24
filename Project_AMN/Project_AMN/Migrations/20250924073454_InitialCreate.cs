@@ -17,6 +17,7 @@ namespace Project_AMN.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     SKU = table.Column<string>(type: "TEXT", nullable: false),
                     Stock = table.Column<int>(type: "INTEGER", nullable: false),
@@ -76,7 +77,7 @@ namespace Project_AMN.Migrations
                     OrderId = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    Status = table.Column<string>(type: "TEXT", nullable: false),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
                     TotalAmount = table.Column<decimal>(type: "TEXT", nullable: false),
                     ShippingAddress = table.Column<string>(type: "TEXT", nullable: false),
                     TrackingNumber = table.Column<string>(type: "TEXT", nullable: true)

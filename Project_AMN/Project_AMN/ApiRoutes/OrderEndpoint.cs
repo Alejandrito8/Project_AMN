@@ -34,9 +34,10 @@ public static class OrderEndpoints
         /// <summary>
         /// Updates the status of an existing order.
         /// </summary>
-        app.MapPut("/api/orders/{orderId}/status", async (int orderId, IOrderService service) =>
+        app.MapPut("/api/orders/{orderId}/status", async (int orderId, OrderUpdateStatusDto dto, IOrderService service) =>
         {
-            var updated = await service.UpdateOrderStatusAsync(orderId);
+            dto.OrderId = orderId; // säkerställ att ID matchar route
+            var updated = await service.UpdateOrderStatusAsync(dto);
             return updated is null ? Results.NotFound() : Results.Ok(updated);
         });
 
@@ -72,10 +73,33 @@ public static class OrderEndpoints
         /// </summary>
         app.MapGet("/api/orders/search", async ([AsParameters] OrderSearchRequest request, IOrderService service) =>
         {
-            var results = await service.SearchOrdersAsync(request.Status, request.FromDate, request.ToDate);
+            OrderStatus? status = null;
+
+            if (!string.IsNullOrWhiteSpace(request.Status) &&
+                Enum.TryParse<OrderStatus>(request.Status, true, out var parsedStatus))
+            {
+                status = parsedStatus;
+            }
+
+            var results = await service.SearchOrdersAsync(status, request.FromDate, request.ToDate);
             return results.Any() ? Results.Ok(results) : Results.NotFound();
+        });
+
+
+        /// <summary>
+        /// Exports all orders to a CSV file.
+        /// </summary>
+        app.MapGet("/api/orders/export", async (HttpResponse response, ApplicationDbContext db) =>
+        {
+            var orders = await db.Orders.Include(o => o.Items).ThenInclude(i => i.Article).ToListAsync();
+            var fileBytes = ExportService.ExportOrders(orders);
+
+            response.ContentType = "text/csv";
+            response.Headers.Add("Content-Disposition", "attachment; filename=orders.csv");
+            await response.Body.WriteAsync(fileBytes);
         });
 
         return app;
     }
 }
+
