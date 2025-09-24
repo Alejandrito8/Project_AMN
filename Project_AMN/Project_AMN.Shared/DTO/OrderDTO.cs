@@ -1,3 +1,5 @@
+using Project_AMN.Shared.Models;
+
 namespace Project_AMN.Shared.DTO
 {
     /// <summary>
@@ -34,7 +36,8 @@ namespace Project_AMN.Shared.DTO
         /// <summary>
         /// Gets or sets the new status of the order (e.g., "Created", "Sent", "Delivered").
         /// </summary>
-        public string Status { get; set; } = "Created";
+        public OrderStatus Status { get; set; }
+
     }
 
     /// <summary>
@@ -55,7 +58,7 @@ namespace Project_AMN.Shared.DTO
         /// <summary>
         /// Gets or sets the current status of the order.
         /// </summary>
-        public string Status { get; set; } = string.Empty;
+        public OrderStatus Status { get; set; }
 
         /// <summary>
         /// Gets or sets the total amount for the order.
@@ -71,6 +74,8 @@ namespace Project_AMN.Shared.DTO
         /// Gets or sets the tracking number for the order, if any.
         /// </summary>
         public string? TrackingNumber { get; set; }
+        public IEnumerable<OrderItemResultDto> Items { get; set; } = new List<OrderItemResultDto>();
+
     }
 
     /// <summary>
@@ -78,11 +83,6 @@ namespace Project_AMN.Shared.DTO
     /// </summary>
     public class OrderItemResultDto
     {
-        /// <summary>
-        /// Gets or sets the unique ID of the order item.
-        /// </summary>
-        public int Id { get; set; }
-
         /// <summary>
         /// Gets or sets the ID of the associated article.
         /// </summary>

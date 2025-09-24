@@ -28,7 +28,14 @@ public class OrderService : IOrderService
                 Status = o.Status,
                 TotalAmount = o.TotalAmount,
                 ShippingAddress = o.ShippingAddress,
-                TrackingNumber = o.TrackingNumber
+                TrackingNumber = o.TrackingNumber,
+                Items = o.Items.Select(i => new OrderItemResultDto
+                {
+                    ArticleId = i.ArticleId,
+                    ArticleName = i.Article.Name,
+                    Quantity = i.Quantity,
+                    OrderPrice = i.OrderPrice
+                }).ToList()
             })
             .ToListAsync();
     }
@@ -38,67 +45,95 @@ public class OrderService : IOrderService
     /// </summary>
     public async Task<OrderResultDto?> GetOrderByIdAsync(int id)
     {
-        return await _context.Orders
-            .Where(o => o.OrderId == id)
-            .Select(o => new OrderResultDto
+        var order = await _context.Orders
+            .Include(o => o.Items)
+            .ThenInclude(i => i.Article)
+            .FirstOrDefaultAsync(o => o.OrderId == id);
+
+        if (order == null) return null;
+
+        return new OrderResultDto
+        {
+            OrderId = order.OrderId,
+            CreatedAt = order.CreatedAt,
+            Status = order.Status,
+            TotalAmount = order.TotalAmount,
+            ShippingAddress = order.ShippingAddress,
+            TrackingNumber = order.TrackingNumber,
+            Items = order.Items.Select(i => new OrderItemResultDto
             {
-                OrderId = o.OrderId,
-                CreatedAt = o.CreatedAt,
-                Status = o.Status,
-                TotalAmount = o.TotalAmount,
-                ShippingAddress = o.ShippingAddress,
-                TrackingNumber = o.TrackingNumber
-            })
-            .FirstOrDefaultAsync();
+                ArticleId = i.ArticleId,
+                ArticleName = i.Article.Name,
+                Quantity = i.Quantity,
+                OrderPrice = i.OrderPrice
+            }).ToList()
+        };
     }
 
     /// <summary>
     /// Creates a new order.
     /// </summary>
-    public async Task<OrderResultDto> CreateOrderAsync(OrderCreateDto dto)
+public async Task<OrderResultDto> CreateOrderAsync(OrderCreateDto dto)
+{
+    if (dto.Items == null || !dto.Items.Any())
+        throw new ArgumentException("Order must contain at least one item.", nameof(dto.Items));
+
+    // Skapa order
+    var order = new Order
     {
-        var order = new Order
-        {
-            CreatedAt = DateTime.UtcNow,
-            Status = "Created",
-            TotalAmount = dto.TotalAmount,
-            ShippingAddress = dto.ShippingAddress
-        };
+        CreatedAt = DateTime.UtcNow,
+        Status = OrderStatus.Created,
+        TotalAmount = dto.TotalAmount,
+        ShippingAddress = dto.ShippingAddress
+    };
 
-        _context.Orders.Add(order);
-        await _context.SaveChangesAsync();
+    _context.Orders.Add(order);
+    await _context.SaveChangesAsync();
 
-        return new OrderResultDto
+    // Lägg till order items och uppdatera stock
+    foreach (var itemDto in dto.Items)
+    {
+        var article = await _context.Articles.FindAsync(itemDto.ArticleId);
+        if (article == null)
+            throw new InvalidOperationException($"Article with ID {itemDto.ArticleId} not found.");
+
+        if (article.Stock < itemDto.Quantity)
+            throw new InvalidOperationException($"Not enough stock for article '{article.Name}'.");
+
+        // Minska stock
+        article.Stock -= itemDto.Quantity;
+
+        var orderItem = new OrderItem
         {
             OrderId = order.OrderId,
-            CreatedAt = order.CreatedAt,
-            Status = order.Status,
-            TotalAmount = order.TotalAmount,
-            ShippingAddress = order.ShippingAddress,
-            TrackingNumber = order.TrackingNumber
+            ArticleId = itemDto.ArticleId,
+            Quantity = itemDto.Quantity,
+            OrderPrice = itemDto.OrderPrice
         };
+
+        _context.OrderItems.Add(orderItem);
     }
+
+    // Spara både order items och uppdaterad stock i samma transaktion
+    await _context.SaveChangesAsync();
+
+    // Hämta order med items för retur
+    return await GetOrderByIdAsync(order.OrderId);
+}
+
 
     /// <summary>
     /// Updates the status of an existing order.
     /// </summary>
-    public async Task<OrderResultDto?> UpdateOrderStatusAsync(int orderId)
+    public async Task<OrderResultDto?> UpdateOrderStatusAsync(OrderUpdateStatusDto dto)
     {
-        var order = await _context.Orders.FindAsync(orderId);
+        var order = await _context.Orders.FindAsync(dto.OrderId);
         if (order == null) return null;
 
-        order.Status = "Sent";
+        order.Status = dto.Status;
         await _context.SaveChangesAsync();
 
-        return new OrderResultDto
-        {
-            OrderId = order.OrderId,
-            CreatedAt = order.CreatedAt,
-            Status = order.Status,
-            TotalAmount = order.TotalAmount,
-            ShippingAddress = order.ShippingAddress,
-            TrackingNumber = order.TrackingNumber
-        };
+        return await GetOrderByIdAsync(order.OrderId);
     }
 
     /// <summary>
@@ -138,7 +173,6 @@ public class OrderService : IOrderService
 
         return new OrderItemResultDto
         {
-            Id = orderItem.Id,
             ArticleId = articleId,
             ArticleName = article.Name,
             Quantity = quantity,
@@ -156,7 +190,6 @@ public class OrderService : IOrderService
             .Where(oi => oi.OrderId == orderId)
             .Select(oi => new OrderItemResultDto
             {
-                Id = oi.Id,
                 ArticleId = oi.ArticleId,
                 ArticleName = oi.Article.Name,
                 Quantity = oi.Quantity,
@@ -168,12 +201,12 @@ public class OrderService : IOrderService
     /// <summary>
     /// Searches for orders based on status and date range.
     /// </summary>
-    public async Task<IEnumerable<OrderResultDto>> SearchOrdersAsync(string? status, DateTime? fromDate, DateTime? toDate)
+    public async Task<IEnumerable<OrderResultDto>> SearchOrdersAsync(OrderStatus? status, DateTime? fromDate, DateTime? toDate)
     {
-        var query = _context.Orders.AsQueryable();
+        var query = _context.Orders.Include(o => o.Items).ThenInclude(i => i.Article).AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(status))
-            query = query.Where(o => o.Status.ToLower().Contains(status.Trim().ToLower()));
+        if (status.HasValue)
+            query = query.Where(o => o.Status == status.Value);
 
         if (fromDate.HasValue)
             query = query.Where(o => o.CreatedAt >= fromDate.Value);
@@ -189,7 +222,14 @@ public class OrderService : IOrderService
                 Status = o.Status,
                 TotalAmount = o.TotalAmount,
                 ShippingAddress = o.ShippingAddress,
-                TrackingNumber = o.TrackingNumber
+                TrackingNumber = o.TrackingNumber,
+                Items = o.Items.Select(i => new OrderItemResultDto
+                {
+                    ArticleId = i.ArticleId,
+                    ArticleName = i.Article.Name,
+                    Quantity = i.Quantity,
+                    OrderPrice = i.OrderPrice
+                }).ToList()
             })
             .ToListAsync();
     }

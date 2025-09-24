@@ -230,6 +230,9 @@ namespace Project_AMN.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
@@ -258,9 +261,8 @@ namespace Project_AMN.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("TEXT");
@@ -354,7 +356,7 @@ namespace Project_AMN.Migrations
             modelBuilder.Entity("Project_AMN.Shared.Models.OrderItem", b =>
                 {
                     b.HasOne("Project_AMN.Shared.Models.Article", "Article")
-                        .WithMany()
+                        .WithMany("OrderItems")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -368,6 +370,11 @@ namespace Project_AMN.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("Project_AMN.Shared.Models.Article", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("Project_AMN.Shared.Models.Order", b =>

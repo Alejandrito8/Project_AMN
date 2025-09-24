@@ -9,6 +9,7 @@
 @inject ArticleService ArticleService
 @inject InboundService InboundService
 @inject OrderService OrderService
+@inject NavigationManager Nav
 
 <PageTitle>Commerce Admin</PageTitle>
 
@@ -33,7 +34,10 @@
     <!-- ARTICLES SECTION -->
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Articles</h3>
-
+                <button class="bg-purple-500 hover:bg-purple-600 text-black p-2 rounded w-full mb-4"
+                @onclick="DownloadExport">
+            Export Articles
+        </button>
         <!-- CREATE NEW ARTICLE -->
         <div class="space-y-2 mb-4">
             <input placeholder="Name" @bind="newArticle.Name" class="border p-2 w-full rounded" />
@@ -43,7 +47,7 @@
             <input type="number" placeholder="Stock" @bind="newArticle.Stock" min="0" step="1"
                    class="border p-2 w-full rounded" />
             <input placeholder="Location" @bind="newArticle.Location" class="border p-2 w-full rounded" />
-            <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded w-full" @onclick="CreateArticle">
+            <button class="bg-blue-500 hover:bg-blue-600 text-black p-2 rounded w-full" @onclick="CreateArticle">
                 Create
             </button>
         </div>
@@ -74,11 +78,11 @@
                     <li class="flex justify-between items-center">
                         <span>@article.Name (@article.SKU) - Stock: @article.Stock - Price: @article.Price</span>
                         <div class="flex space-x-2">
-                            <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded"
+                            <button class="bg-yellow-500 hover:bg-yellow-600 text-black px-2 py-1 rounded"
                                     @onclick="() => EditArticle(article)">
                                 Edit
                             </button>
-                            <button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded"
+                            <button class="bg-red-500 hover:bg-red-600 text-black px-2 py-1 rounded"
                                     @onclick="() => DeleteArticle(article.Id)">
                                 Delete
                             </button>
@@ -99,8 +103,8 @@
                     <input type="number" placeholder="Stock" @bind="editingArticleDto.Stock" min="0" step="1" class="border p-1 mb-2 w-full" />
                     <input placeholder="Location" @bind="editingArticleDto.Location" class="border p-1 mb-2 w-full" />
                     <div class="flex justify-end space-x-2">
-                        <button class="bg-gray-500 text-white p-1 rounded" @onclick="CancelEditArticle">Cancel</button>
-                        <button class="bg-green-500 text-white p-1 rounded" @onclick="SaveEditArticle">Save</button>
+                        <button class="bg-gray-500 text-black p-1 rounded" @onclick="CancelEditArticle">Cancel</button>
+                        <button class="bg-green-500 text-black p-1 rounded" @onclick="SaveEditArticle">Save</button>
                     </div>
                 </div>
             </div>
@@ -110,7 +114,11 @@
     <!-- ORDERS SECTION -->
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Orders</h3>
-
+        
+        <button class="bg-indigo-500 hover:bg-indigo-600 text-black p-2 rounded w-full mb-4"
+                @onclick="DownloadOrdersExport">
+            Export Orders
+        </button>
         <!-- SEARCH & FILTER ORDERS -->
         <div class="space-y-2 mb-4">
             <input placeholder="Search by OrderId" 
@@ -121,7 +129,7 @@
                 <option value="">All Statuses</option>
                 <option value="Created">Created</option>
                 <option value="Completed">Completed</option>
-                <option value="Sent">Sent</option>
+                <option value="Sent"></option>
                 <option value="Canceled">Canceled</option>
             </select>
         </div>
@@ -135,7 +143,7 @@
             <ul class="list-disc list-inside max-h-64 overflow-y-auto space-y-1">
                 @foreach (var order in FilterOrders)
                 {
-                    <li>OrderId: @order.OrderId | Status: @order.Status</li>
+                    <li>OrderId: @order.OrderId | Status: @order.Status | Order amount: @order.TotalAmount</li>
                 }
             </ul>
         }
@@ -149,7 +157,7 @@
             <input placeholder="Article SKU" @bind="inboundSku" class="border p-2 w-full rounded" />
             <input type="number" placeholder="Quantity" @bind="inboundQuantity" min="1" step="1"
                    class="border p-2 w-full rounded" />
-            <button class="bg-green-500 hover:bg-green-600 text-white p-2 rounded w-full"
+            <button class="bg-green-500 hover:bg-green-600 text-black p-2 rounded w-full"
                     @onclick="RegisterInbound">
                 Register
             </button>
@@ -193,8 +201,11 @@
             (string.IsNullOrWhiteSpace(orderSearchText) || 
              o.OrderId.ToString().Contains(orderSearchText, StringComparison.OrdinalIgnoreCase)) &&
             (string.IsNullOrWhiteSpace(orderStatusFilter) || 
-             o.Status.Equals(orderStatusFilter, StringComparison.OrdinalIgnoreCase))
+             o.Status.ToString().Equals(orderStatusFilter, StringComparison.OrdinalIgnoreCase))
         );
+
+    private void DownloadExport() => Nav.NavigateTo("/api/articles/export", forceLoad: true);
+    private void DownloadOrdersExport() => Nav.NavigateTo("/api/orders/export", forceLoad: true);
 
     // INBOUNDS
     private string inboundSku = string.Empty;
