@@ -156,42 +156,45 @@ else
             cart.Remove(item);
     }
 
-    private async Task CreateOrder()
+private async Task CreateOrder()
+{
+    if (!cart.Any())
     {
-        if (!cart.Any())
-        {
-            successMessage = "Your cart is empty!";
-            return;
-        }
-
-        var orderDto = new OrderCreateDto
-        {
-            ShippingAddress = shippingAddress,
-            TotalAmount = cart.Sum(a => a.Price),
-            Items = cart.Select(a => new OrderItemCreateDto
-            {
-                ArticleId = a.Id,
-                Quantity = 1,
-                OrderPrice = a.Price
-            }).ToList()
-        };
-
-        var createdOrder = await OrderService.CreateOrderAsync(orderDto);
-
-        if (createdOrder != null)
-        {
-            // Hämta färska artiklar från databasen
-            await LoadArticlesAsync();
-
-            cart.Clear();
-            successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
-            StateHasChanged();
-        }
-        else
-        {
-            successMessage = "Error creating order. Please try again.";
-        }
+        successMessage = "Your cart is empty!";
+        return;
     }
+
+    var orderDto = new OrderCreateDto
+    {
+        TotalAmount = cart.Sum(c => c.Article.Price * c.Quantity),
+        ShippingAddress = "Default Address", // Kan bytas mot inputfält
+        Items = cart.Select(c => new OrderItemCreateDto
+        {
+            ArticleId = c.Article.Id,
+            Quantity = c.Quantity,
+            OrderPrice = c.Article.Price
+        }).ToList()
+    };
+
+    // Skapa order och uppdatera artiklar i service
+    var createdOrder = await OrderService.CreateOrderAsync(orderDto);
+
+    if (createdOrder != null)
+    {
+        // Uppdatera artiklar för att visa korrekt stock direkt efter order
+        var updatedArticles = await ArticleService.GetAllArticlesAsync();
+        articles = updatedArticles?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
+
+        cart.Clear();
+        successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
+        StateHasChanged();
+    }
+    else
+    {
+        successMessage = "Error creating order. Please try again.";
+    }
+}
+
 
     private IEnumerable<ArticleResultDto> FilteredArticles =>
         articles.Where(a =>

@@ -46,7 +46,10 @@ public static class ArticleEndpoints
                 : Results.NotFound($"Article with ID {Id} not found.");
         });
 
-        app.MapGet("/articles/export", async (HttpResponse response, ApplicationDbContext db) =>
+        /// <summary>
+        /// Exports all articles to a CSV file.
+        /// </summary>
+        app.MapGet("api/articles/export", async (HttpResponse response, ApplicationDbContext db) =>
         {
             var articles = await db.Articles.ToListAsync();
             var fileBytes = ExportService.ExportArticles(articles);
