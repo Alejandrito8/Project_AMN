@@ -6,11 +6,6 @@
 
 <h3 class="mb-4">Create Your Order</h3>
 
-<div class="mb-4">
-    <label class="form-label">Shipping Address:</label>
-    <input type="text" placeholder="Enter your shipping address" @bind="shippingAddress" class="form-control" />
-</div>
-
 <h4 class="mb-3">Available Articles</h4>
 
 <!-- Search and Stock Filter -->
@@ -81,8 +76,13 @@
             </tbody>
         </table>
     </div>
-    <p class="fw-bold fs-5">Total Amount: @cart.Sum(i => i.Price) kr</p>
-    <button class="btn btn-success btn-lg" @onclick="CreateOrder">Place Order</button>
+
+    <p class="fw-bold fs-5">Total Amount: @cart.Sum(i => i.Article.Price * i.Quantity) kr</p>
+
+    <div class="d-flex justify-content-start mt-2">
+        <button class="btn btn-success btn-sm" style="min-width:120px; max-width:150px;"
+                @onclick="async () => await CreateOrder()">Place Order</button>
+    </div>
 }
 else
 {
@@ -96,8 +96,14 @@ else
 
 @code {
     private List<ArticleResultDto> articles = new();
-    private List<ArticleResultDto> cart = new();
-    private string shippingAddress = string.Empty;
+
+    private class CartItem
+    {
+        public ArticleResultDto Article { get; set; } = null!;
+        public int Quantity { get; set; } = 1;
+    }
+
+    private List<CartItem> cart = new();
     private string successMessage = string.Empty;
 
     private string searchText = string.Empty;
@@ -105,8 +111,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var allArticles = await ArticleService.GetAllArticlesAsync();
-        articles = allArticles.Where(a => a != null).Select(a => a!).ToList();
+        await LoadArticlesAsync();
+    }
+
+    private async Task LoadArticlesAsync()
+    {
+        var result = await ArticleService.GetAllArticlesAsync();
+        articles = result?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
     }
 
     private bool CanAddToCart(ArticleResultDto article)
@@ -116,18 +127,42 @@ else
 
     private void AddToCart(ArticleResultDto article)
     {
-        if (!CanAddToCart(article)) return;
-        cart.Add(article);
+        var existing = cart.FirstOrDefault(c => c.Article.Id == article.Id);
+        if (existing != null)
+        {
+            if (existing.Quantity < article.Stock)
+                existing.Quantity++;
+        }
+        else
+        {
+            cart.Add(new CartItem { Article = article, Quantity = 1 });
+        }
     }
 
-    private void RemoveFromCart(ArticleResultDto item)
+    private void IncreaseQuantity(CartItem item)
     {
-        cart.Remove(item);
+        var article = articles.FirstOrDefault(a => a.Id == item.Article.Id);
+        if (article != null && item.Quantity < article.Stock)
+        {
+            item.Quantity++;
+        }
+    }
+
+    private void DecreaseQuantity(CartItem item)
+    {
+        if (item.Quantity > 1)
+            item.Quantity--;
+        else
+            cart.Remove(item);
     }
 
     private async Task CreateOrder()
     {
-        if (!cart.Any() || string.IsNullOrWhiteSpace(shippingAddress)) return;
+        if (!cart.Any())
+        {
+            successMessage = "Your cart is empty!";
+            return;
+        }
 
         var orderDto = new OrderCreateDto
         {
@@ -145,9 +180,12 @@ else
 
         if (createdOrder != null)
         {
-            successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
+            // Hämta färska artiklar från databasen
+            await LoadArticlesAsync();
+
             cart.Clear();
-            shippingAddress = string.Empty;
+            successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
+            StateHasChanged();
         }
         else
         {
@@ -155,7 +193,6 @@ else
         }
     }
 
-    // Filtered articles based on search and stock
     private IEnumerable<ArticleResultDto> FilteredArticles =>
         articles.Where(a =>
             (string.IsNullOrWhiteSpace(searchText) ||

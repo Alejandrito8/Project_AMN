@@ -7,6 +7,7 @@
 
 @inject ArticleService ArticleService
 @inject InboundService InboundService
+@inject OrderService OrderService
 
 <PageTitle>Commerce Admin</PageTitle>
 
@@ -112,14 +113,15 @@
 
         <!-- SEARCH & FILTER ORDERS -->
         <div class="space-y-2 mb-4">
-            <input placeholder="Search by OrderId or Customer" 
+            <input placeholder="Search by OrderId" 
                    @bind="orderSearchText" 
                    class="border p-2 w-full rounded" />
 
             <select @bind="orderStatusFilter" class="border p-2 w-full rounded">
                 <option value="">All Statuses</option>
-                <option value="Pending">Pending</option>
+                <option value="Created">Created</option>
                 <option value="Completed">Completed</option>
+                <option value="Sent">Sent</option>
                 <option value="Canceled">Canceled</option>
             </select>
         </div>
@@ -133,7 +135,7 @@
             <ul class="list-disc list-inside max-h-64 overflow-y-auto space-y-1">
                 @foreach (var order in FilterOrders)
                 {
-                    <li>@order</li>
+                    <li>OrderId: @order.OrderId | Status: @order.Status</li>
                 }
             </ul>
         }
@@ -161,6 +163,7 @@
 </div>
 
 @code {
+    // ARTICLES
     private ArticleCreateDto newArticle = new();
     private List<ArticleResultDto> articles = new();
     private ArticleResultDto? editingArticle;
@@ -180,19 +183,20 @@
              (stockFilter == "out" && a.Stock == 0))
         );
 
-    // Orders
-    private List<string> orders = new();
+    // ORDERS
+    private List<OrderResultDto> orders = new();
     private string orderSearchText = string.Empty;
     private string orderStatusFilter = string.Empty;
 
-    private IEnumerable<string> FilterOrders =>
+    private IEnumerable<OrderResultDto> FilterOrders =>
         orders.Where(o =>
-            (string.IsNullOrWhiteSpace(orderSearchText) ||
-             o.Contains(orderSearchText, StringComparison.OrdinalIgnoreCase)) &&
-            (string.IsNullOrWhiteSpace(orderStatusFilter) ||
-             o.Contains(orderStatusFilter, StringComparison.OrdinalIgnoreCase))
+            (string.IsNullOrWhiteSpace(orderSearchText) || 
+             o.OrderId.ToString().Contains(orderSearchText, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrWhiteSpace(orderStatusFilter) || 
+             o.Status.Equals(orderStatusFilter, StringComparison.OrdinalIgnoreCase))
         );
 
+    // INBOUNDS
     private string inboundSku = string.Empty;
     private int inboundQuantity;
     private string inboundMessage = string.Empty;
@@ -200,12 +204,7 @@
     protected override async Task OnInitializedAsync()
     {
         await LoadArticlesAsync();
-        orders = new List<string>
-        {
-            "OrderId: 1 | Customer: John Doe | Status: Pending",
-            "OrderId: 2 | Customer: Jane Smith | Status: Completed",
-            "OrderId: 3 | Customer: Alice | Status: Canceled"
-        };
+        await LoadOrdersAsync();
     }
 
     private async Task LoadArticlesAsync()
@@ -214,15 +213,19 @@
         articles = result?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
     }
 
+    private async Task LoadOrdersAsync()
+    {
+        var result = await OrderService.GetAllOrdersAsync();
+        orders = result?.ToList() ?? new List<OrderResultDto>();
+    }
+
     private async Task CreateArticle()
     {
         if (string.IsNullOrWhiteSpace(newArticle.Name))
             return;
 
         if (string.IsNullOrWhiteSpace(newArticle.SKU))
-        {
             newArticle.SKU = GenerateUniqueSku();
-        }
         else if (articles.Any(a => a.SKU == newArticle.SKU))
         {
             inboundMessage = $"The SKU '{newArticle.SKU}' is already in use.";
@@ -245,8 +248,7 @@
             var timestamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
             var randomPart = Guid.NewGuid().ToString().Substring(0, 4).ToUpper();
             sku = $"ART-{timestamp}-{randomPart}";
-        }
-        while (articles.Any(a => a.SKU == sku));
+        } while (articles.Any(a => a.SKU == sku));
 
         return sku;
     }
