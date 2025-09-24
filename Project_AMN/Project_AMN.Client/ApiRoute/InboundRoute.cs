@@ -1,19 +1,19 @@
 using System.Net.Http.Json;
 using Project_AMN.Shared.DTO;
 
-namespace Project_AMN.Client.ApiServices;
+namespace Project_AMN.Client.ApiRoutes;
 
 /// <summary>
 /// Provides client-side methods to register inbound articles via the API.
 /// </summary>
-public class InboundService
+public class InboundRoute
 {
     private readonly HttpClient _http;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="InboundService"/> class.
+    /// Initializes a new instance of the <see cref="InboundRoute"/> class.
     /// </summary>
-    public InboundService(HttpClient http)
+    public InboundRoute(HttpClient http)
     {
         _http = http;
     }

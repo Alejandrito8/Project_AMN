@@ -1,14 +1,13 @@
 @page "/orders"
-@using Project_AMN.Client.Services
+@using Project_AMN.Client.ApiRoutes
 @using Project_AMN.Shared.DTO
-@inject OrderService OrderService
-@inject ArticleService ArticleService
+@inject OrderRoute OrderRoute
+@inject ArticleRoute ArticleRoute
 
 <h3 class="mb-4">Create Your Order</h3>
 
 <h4 class="mb-3">Available Articles</h4>
 
-<!-- Search and Stock Filter -->
 <div class="mb-3 d-flex gap-2">
     <input type="text" @bind="searchText" placeholder="Search by name..." class="form-control" />
     <select @bind="stockFilter" class="form-select">
@@ -43,7 +42,7 @@
                     </p>
                     <div class="d-flex justify-content-center mt-auto">
                         <button class="btn btn-primary btn-sm" style="min-width:120px; max-width:150px;"
-                                @onclick="() => AddToCart(article)" disabled="@(!CanAddToCart(article))">
+                            @onclick="() => AddToCart(article)" disabled="@(!CanAddToCart(article))">
                             Add to Cart
                         </button>
                     </div>
@@ -75,15 +74,15 @@
                         <td>
                             <div class="d-flex gap-1">
                                 <button class="btn btn-sm btn-secondary" style="width:40px;"
-                                        @onclick="() => DecreaseQuantity(item)">-</button>
+                                    @onclick="() => DecreaseQuantity(item)">-</button>
                                 <span class="px-2 align-self-center">@item.Quantity</span>
                                 <button class="btn btn-sm btn-secondary" style="width:40px;"
-                                        @onclick="() => IncreaseQuantity(item)">+</button>
+                                    @onclick="() => IncreaseQuantity(item)">+</button>
                             </div>
                         </td>
                         <td>
                             <button class="btn btn-danger btn-sm" style="min-width:120px; max-width:150px;"
-                                    @onclick="() => cart.Remove(item)">Remove</button>
+                                @onclick="() => cart.Remove(item)">Remove</button>
                         </td>
                     </tr>
                 }
@@ -95,7 +94,7 @@
 
     <div class="d-flex justify-content-start mt-2">
         <button class="btn btn-success btn-sm" style="min-width:120px; max-width:150px;"
-                @onclick="async () => await CreateOrder()">Place Order</button>
+            @onclick="async () => await CreateOrder()">Place Order</button>
     </div>
 }
 else
@@ -123,23 +122,35 @@ else
     private string searchText = string.Empty;
     private string stockFilter = string.Empty;
 
+    /// <summary>
+    /// Initialize component by loading all articles.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadArticlesAsync();
     }
 
+    /// <summary>
+    /// Load all articles from API.
+    /// </summary>
     private async Task LoadArticlesAsync()
     {
-        var result = await ArticleService.GetAllArticlesAsync();
+        var result = await ArticleRoute.GetAllArticlesAsync();
         articles = result?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
     }
 
+    /// <summary>
+    /// Check if an article can be added to the cart.
+    /// </summary>
     private bool CanAddToCart(ArticleResultDto article)
     {
         var existing = cart.FirstOrDefault(c => c.Article.Id == article.Id);
         return article.Stock > 0 && (existing == null || existing.Quantity < article.Stock);
     }
 
+    /// <summary>
+    /// Add an article to the cart or increase quantity.
+    /// </summary>
     private void AddToCart(ArticleResultDto article)
     {
         var existing = cart.FirstOrDefault(c => c.Article.Id == article.Id);
@@ -154,6 +165,9 @@ else
         }
     }
 
+    /// <summary>
+    /// Increase quantity of a cart item.
+    /// </summary>
     private void IncreaseQuantity(CartItem item)
     {
         var article = articles.FirstOrDefault(a => a.Id == item.Article.Id);
@@ -163,6 +177,9 @@ else
         }
     }
 
+    /// <summary>
+    /// Decrease quantity of a cart item or remove it.
+    /// </summary>
     private void DecreaseQuantity(CartItem item)
     {
         if (item.Quantity > 1)
@@ -171,45 +188,45 @@ else
             cart.Remove(item);
     }
 
-private async Task CreateOrder()
-{
-    if (!cart.Any())
+    /// <summary>
+    /// Create an order from the cart.
+    /// </summary>
+    private async Task CreateOrder()
     {
-        successMessage = "Your cart is empty!";
-        return;
-    }
-
-    var orderDto = new OrderCreateDto
-    {
-        TotalAmount = cart.Sum(c => c.Article.Price * c.Quantity),
-        ShippingAddress = "Default Address", // Kan bytas mot inputfält
-        Items = cart.Select(c => new OrderItemCreateDto
+        if (!cart.Any())
         {
-            ArticleId = c.Article.Id,
-            Quantity = c.Quantity,
-            OrderPrice = c.Article.Price
-        }).ToList()
-    };
+            successMessage = "Your cart is empty!";
+            return;
+        }
 
-    // Skapa order och uppdatera artiklar i service
-    var createdOrder = await OrderService.CreateOrderAsync(orderDto);
+        var orderDto = new OrderCreateDto
+        {
+            TotalAmount = cart.Sum(c => c.Article.Price * c.Quantity),
+            ShippingAddress = "Default Address",
+            Items = cart.Select(c => new OrderItemCreateDto
+            {
+                ArticleId = c.Article.Id,
+                Quantity = c.Quantity,
+                OrderPrice = c.Article.Price
+            }).ToList()
+        };
 
-    if (createdOrder != null)
-    {
-        // Uppdatera artiklar för att visa korrekt stock direkt efter order
-        var updatedArticles = await ArticleService.GetAllArticlesAsync();
-        articles = updatedArticles?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
+        var createdOrder = await OrderRoute.CreateOrderAsync(orderDto);
 
-        cart.Clear();
-        successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
-        StateHasChanged();
+        if (createdOrder != null)
+        {
+            var updatedArticles = await ArticleRoute.GetAllArticlesAsync();
+            articles = updatedArticles?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
+
+            cart.Clear();
+            successMessage = $"Order #{createdOrder.OrderId} placed successfully!";
+            StateHasChanged();
+        }
+        else
+        {
+            successMessage = "Error creating order. Please try again.";
+        }
     }
-    else
-    {
-        successMessage = "Error creating order. Please try again.";
-    }
-}
-
 
     private IEnumerable<ArticleResultDto> FilteredArticles =>
         articles.Where(a =>
