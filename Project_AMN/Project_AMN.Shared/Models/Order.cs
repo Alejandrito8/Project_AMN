@@ -43,7 +43,7 @@ namespace Project_AMN.Shared.Models
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
     }
 
-        public enum OrderStatus
+    public enum OrderStatus
     {
         Created = 0,
         Sent = 1,

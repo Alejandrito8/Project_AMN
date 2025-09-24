@@ -26,8 +26,7 @@ public class InboundRoute
     /// <returns>The updated article data, or null if the operation failed.</returns>
     public async Task<ArticleResultDto?> RegisterInboundAsync(string sku, int quantity)
     {
-        // Send PUT request to the inbound endpoint
-        var response = await _http.PutAsJsonAsync($"/api/inbound/{sku}?quantity={quantity}", 
+        var response = await _http.PutAsJsonAsync($"/api/inbound/{sku}?quantity={quantity}",
                                                    value: (object?)null);
 
         if (response.IsSuccessStatusCode)

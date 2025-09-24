@@ -1,4 +1,3 @@
-
 namespace Project_AMN.Handler;
 
 public class DeleteArticleHandler : IRequestHandler<DeleteArticleCommand, bool>
@@ -16,7 +15,3 @@ public class DeleteArticleHandler : IRequestHandler<DeleteArticleCommand, bool>
     }
 
 }
-
-
-
-

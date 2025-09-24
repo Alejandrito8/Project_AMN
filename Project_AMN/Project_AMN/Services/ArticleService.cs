@@ -64,7 +64,6 @@ namespace Project_AMN.Services
             return true;
         }
 
-
         /// <summary>
         /// Retrieves all articles from the database.
         /// </summary>
@@ -175,7 +174,5 @@ namespace Project_AMN.Services
                 })
                 .ToListAsync();
         }
-
-
     }
 }

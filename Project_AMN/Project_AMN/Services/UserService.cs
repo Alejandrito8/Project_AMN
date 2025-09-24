@@ -121,16 +121,4 @@ public class UserService : IUserService
             Roles = (await _userManager.GetRolesAsync(user)).ToList()
         };
     }
-
-    // /// <summary>
-    // /// Deletes a user by ID.
-    // /// </summary>
-    // public async Task<bool> DeleteUserAsync(string id)
-    // {
-    //     var user = await _userManager.FindByIdAsync(id);
-    //     if (user == null) return false;
-    //
-    //     var result = await _userManager.DeleteAsync(user);
-    //     return result.Succeeded;
-    // }
 }

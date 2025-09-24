@@ -21,7 +21,6 @@ public static class AdminEndpoints
         })
         .RequireAuthorization(policy => policy.RequireRole("Admin"));
 
-
         /// <summary>
         /// Retrieves a list of all users.
         /// </summary>
