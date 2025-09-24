@@ -23,7 +23,7 @@ public interface IOrderService
     /// <summary>
     /// Updates the status of an existing order.
     /// </summary>
-    Task<OrderResultDto?> UpdateOrderStatusAsync(int orderId);
+    Task<OrderResultDto?> UpdateOrderStatusAsync(OrderUpdateStatusDto dto);
 
     /// <summary>
     /// Deletes an existing order by ID.
@@ -43,5 +43,5 @@ public interface IOrderService
     /// <summary>
     /// Searches for orders based on status and date range.
     /// </summary>
-    Task<IEnumerable<OrderResultDto>> SearchOrdersAsync(string? status, DateTime? fromDate, DateTime? toDate);
+    Task<IEnumerable<OrderResultDto>> SearchOrdersAsync(OrderStatus? status, DateTime? fromDate, DateTime? toDate);
 }

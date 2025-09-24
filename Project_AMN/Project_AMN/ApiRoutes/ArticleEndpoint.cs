@@ -68,7 +68,7 @@ public static class ArticleEndpoints
         /// <summary>
         /// Exports all articles to a CSV file.
         /// </summary>
-        app.MapGet("/articles/export", async (HttpResponse response, ApplicationDbContext db) =>
+        app.MapGet("api/articles/export", async (HttpResponse response, ApplicationDbContext db) =>
         {
             var articles = await db.Articles.ToListAsync();
             var fileBytes = ExportService.ExportArticles(articles);

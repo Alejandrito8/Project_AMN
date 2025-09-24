@@ -9,6 +9,7 @@ namespace Project_AMN.Shared.Models
         /// Gets or sets the unique identifier of the article.
         /// </summary>
         public int Id { get; set; }
+        public int OrderId { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the article.
@@ -34,5 +35,6 @@ namespace Project_AMN.Shared.Models
         /// Gets or sets the location of the article in the warehouse.
         /// </summary>
         public string Location { get; set; } = string.Empty;
+        public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     }
 }
