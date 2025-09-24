@@ -1,19 +1,19 @@
 using Project_AMN.Shared.DTO;
 using System.Net.Http.Json;
 
-namespace Project_AMN.Client.Services;
+namespace Project_AMN.Client.ApiRoutes;
 
 /// <summary>
 /// Provides client-side methods for managing orders via the API.
 /// </summary>
-public class OrderService
+public class OrderRoute
 {
     private readonly HttpClient _http;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="OrderService"/> class.
+    /// Initializes a new instance of the <see cref="OrderRoute"/> class.
     /// </summary>
-    public OrderService(HttpClient http)
+    public OrderRoute(HttpClient http)
     {
         _http = http;
     }
@@ -26,15 +26,6 @@ public class OrderService
         var orders = await _http.GetFromJsonAsync<List<OrderResultDto?>>("/api/orders");
         return orders ?? new List<OrderResultDto?>();
     }
-
-    // /// <summary>
-    // /// Retrieves an order by ID from the API.
-    // /// </summary>
-    // public async Task<OrderResultDto?> GetOrderByIdAsync(int id)
-    // {
-    //     var order = await _http.GetFromJsonAsync<OrderResultDto?>($"/api/orders/{id}");
-    //     return order;
-    // }
 
     /// <summary>
     /// Creates a new order via the API.

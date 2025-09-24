@@ -2,19 +2,19 @@ using System.Net.Http.Json;
 using Project_AMN.Shared.DTO;
 using Project_AMN.Shared.Models;
 
-namespace Project_AMN.Client.Services;
+namespace Project_AMN.Client.ApiRoutes;
 
 /// <summary>
 /// Provides client-side methods for managing articles via HTTP API.
 /// </summary>
-public class ArticleService
+public class ArticleRoute
 {
     private readonly HttpClient _http;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="ArticleService"/> class.
+    /// Initializes a new instance of the <see cref="ArticleRoute"/> class.
     /// </summary>
-    public ArticleService(HttpClient http)
+    public ArticleRoute(HttpClient http)
     {
         _http = http;
     }

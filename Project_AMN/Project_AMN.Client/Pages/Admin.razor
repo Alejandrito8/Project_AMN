@@ -1,14 +1,13 @@
 @page "/commerceAdmin"
 @using Microsoft.AspNetCore.Authorization
-@using Project_AMN.Client.ApiServices
-@using Project_AMN.Client.Services
+@using Project_AMN.Client.ApiRoutes
 @using Project_AMN.Shared.DTO
 @using Project_AMN.Shared.Models
 @using Microsoft.AspNetCore.Components.Authorization
 
-@inject ArticleService ArticleService
-@inject InboundService InboundService
-@inject OrderService OrderService
+@inject ArticleRoute ArticleRoute
+@inject InboundRoute InboundRoute
+@inject OrderRoute OrderRoute
 @inject NavigationManager Nav
 
 <PageTitle>Commerce Admin</PageTitle>
@@ -31,14 +30,13 @@
 </AuthorizeView>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <!-- ARTICLES SECTION -->
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Articles</h3>
-                <button class="bg-purple-500 hover:bg-purple-600 text-black p-2 rounded w-full mb-4"
+        <button class="bg-purple-500 hover:bg-purple-600 text-black p-2 rounded w-full mb-4"
                 @onclick="DownloadExport">
             Export Articles
         </button>
-        <!-- CREATE NEW ARTICLE -->
+        
         <div class="space-y-2 mb-4">
             <input placeholder="Name" @bind="newArticle.Name" class="border p-2 w-full rounded" />
             <input placeholder="SKU" @bind="newArticle.SKU" class="border p-2 w-full rounded" />
@@ -52,7 +50,6 @@
             </button>
         </div>
 
-        <!-- SEARCH & FILTER -->
         <div class="mb-3 flex gap-2">
             <input type="text"
                    @bind="searchText"
@@ -65,7 +62,6 @@
             </select>
         </div>
 
-        <!-- EXISTING ARTICLES -->
         @if (articles == null || !articles.Any())
         {
             <p class="text-gray-500 italic">No articles found.</p>
@@ -92,7 +88,6 @@
             </ul>
         }
 
-        <!-- EDIT ARTICLE MODAL -->
         @if (editingArticle != null)
         {
             <div class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -111,7 +106,6 @@
         }
     </div>
 
-    <!-- ORDERS SECTION -->
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Orders</h3>
         
@@ -119,7 +113,6 @@
                 @onclick="DownloadOrdersExport">
             Export Orders
         </button>
-        <!-- SEARCH & FILTER ORDERS -->
         <div class="space-y-2 mb-4">
             <input placeholder="Search by OrderId" 
                    @bind="orderSearchText" 
@@ -134,39 +127,38 @@
                 <option value="Completed">Completed</option>
             </select>
         </div>
-<!-- UPDATE ORDER STATUS -->
-<div class="mb-4">
-    <h4 class="font-semibold mb-2">Update Order Status</h4>
 
-    <div class="flex gap-2">
-        <select @bind="selectedOrderId" class="border p-2 rounded flex-1">
-            <option value="">Select Order</option>
-            @foreach (var order in orders)
+        <div class="mb-4">
+            <h4 class="font-semibold mb-2">Update Order Status</h4>
+
+            <div class="flex gap-2">
+                <select @bind="selectedOrderId" class="border p-2 rounded flex-1">
+                    <option value="">Select Order</option>
+                    @foreach (var order in orders)
+                    {
+                        <option value="@order.OrderId">Order #@order.OrderId | Current: @order.Status</option>
+                    }
+                </select>
+
+                <select @bind="selectedOrderStatus" class="border p-2 rounded flex-1">
+                    <option value="">Select New Status</option>
+                    @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+
+                <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded"
+                        @onclick="UpdateOrderStatus">
+                    Update
+                </button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(orderStatusMessage))
             {
-                <option value="@order.OrderId">Order #@order.OrderId | Current: @order.Status</option>
+                <p class="text-green-600 mt-2">@orderStatusMessage</p>
             }
-        </select>
-
-        <select @bind="selectedOrderStatus" class="border p-2 rounded flex-1">
-            <option value="">Select New Status</option>
-            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
-            {
-                <option value="@status">@status</option>
-            }
-        </select>
-
-        <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded"
-                @onclick="UpdateOrderStatus">
-            Update
-        </button>
-    </div>
-
-    @if (!string.IsNullOrEmpty(orderStatusMessage))
-    {
-        <p class="text-green-600 mt-2">@orderStatusMessage</p>
-    }
-</div>
-
+        </div>
 
         @if (orders == null || !orders.Any())
         {
@@ -183,7 +175,6 @@
         }
     </div>
 
-    <!-- INBOUNDS SECTION -->
     <div class="p-4 border rounded-2xl shadow bg-white">
         <h3 class="text-lg font-bold mb-3">Inbounds</h3>
 
@@ -205,7 +196,6 @@
 </div>
 
 @code {
-    // ARTICLES
     private ArticleCreateDto newArticle = new();
     private List<ArticleResultDto> articles = new();
     private ArticleResultDto? editingArticle;
@@ -225,7 +215,6 @@
              (stockFilter == "out" && a.Stock == 0))
         );
 
-    // ORDERS
     private int? selectedOrderId;
     private OrderStatus? selectedOrderStatus;
     private string orderStatusMessage = string.Empty;
@@ -244,29 +233,40 @@
     private void DownloadExport() => Nav.NavigateTo("/api/articles/export", forceLoad: true);
     private void DownloadOrdersExport() => Nav.NavigateTo("/api/orders/export", forceLoad: true);
 
-    // INBOUNDS
     private string inboundSku = string.Empty;
     private int inboundQuantity;
     private string inboundMessage = string.Empty;
 
+    /// <summary>
+    /// Load articles and orders on initialization.
+    /// </summary>
     protected override async Task OnInitializedAsync()
     {
         await LoadArticlesAsync();
         await LoadOrdersAsync();
     }
 
+    /// <summary>
+    /// Load all articles from API.
+    /// </summary>
     private async Task LoadArticlesAsync()
     {
-        var result = await ArticleService.GetAllArticlesAsync();
+        var result = await ArticleRoute.GetAllArticlesAsync();
         articles = result?.Where(a => a != null).Select(a => a!).ToList() ?? new List<ArticleResultDto>();
     }
 
+    /// <summary>
+    /// Load all orders from API.
+    /// </summary>
     private async Task LoadOrdersAsync()
     {
-        var result = await OrderService.GetAllOrdersAsync();
+        var result = await OrderRoute.GetAllOrdersAsync();
         orders = result?.ToList() ?? new List<OrderResultDto>();
     }
 
+    /// <summary>
+    /// Create a new article with validation and unique SKU.
+    /// </summary>
     private async Task CreateArticle()
     {
         if (string.IsNullOrWhiteSpace(newArticle.Name))
@@ -283,10 +283,14 @@
         if (newArticle.Price <= 0 || newArticle.Stock < 0)
             return;
 
-        await ArticleService.CreateArticleAsync(newArticle);
+        await ArticleRoute.CreateArticleAsync(newArticle);
         await LoadArticlesAsync();
         newArticle = new ArticleCreateDto();
     }
+
+    /// <summary>
+    /// Generate a unique SKU using timestamp and random GUID part.
+    /// </summary>
     private string GenerateUniqueSku()
     {
         string sku;
@@ -300,12 +304,18 @@
         return sku;
     }
 
+    /// <summary>
+    /// Delete an article by ID.
+    /// </summary>
     private async Task DeleteArticle(int id)
     {
-        await ArticleService.DeleteArticleAsync(id);
+        await ArticleRoute.DeleteArticleAsync(id);
         await LoadArticlesAsync();
     }
 
+    /// <summary>
+    /// Prepare article for editing.
+    /// </summary>
     private void EditArticle(ArticleResultDto article)
     {
         editingArticle = article;
@@ -318,12 +328,18 @@
         };
     }
 
+    /// <summary>
+    /// Cancel edit mode.
+    /// </summary>
     private void CancelEditArticle()
     {
         editingArticle = null;
         editingArticleDto = new ArticleUpdateDto();
     }
 
+    /// <summary>
+    /// Save changes to an article.
+    /// </summary>
     private async Task SaveEditArticle()
     {
         if (editingArticle == null)
@@ -341,7 +357,7 @@
             return;
         }
 
-        var updatedArticle = await ArticleService.UpdateArticleAsync(editingArticleDto, editingArticle.SKU);
+        var updatedArticle = await ArticleRoute.UpdateArticleAsync(editingArticleDto, editingArticle.SKU);
 
         if (updatedArticle != null)
         {
@@ -353,41 +369,47 @@
             CancelEditArticle();
         }
     }
+
+    /// <summary>
+    /// Update the status of a selected order.
+    /// </summary>
     private async Task UpdateOrderStatus()
-{
-    orderStatusMessage = string.Empty;
-
-    if (selectedOrderId == null || selectedOrderStatus == null)
     {
-        orderStatusMessage = "Please select an order and a status.";
-        return;
+        orderStatusMessage = string.Empty;
+
+        if (selectedOrderId == null || selectedOrderStatus == null)
+        {
+            orderStatusMessage = "Please select an order and a status.";
+            return;
+        }
+
+        var updateDto = new OrderUpdateStatusDto
+        {
+            OrderId = selectedOrderId.Value,
+            Status = selectedOrderStatus.Value
+        };
+
+        var updatedOrder = await OrderRoute.UpdateOrderStatusAsync(updateDto);
+
+        if (updatedOrder != null)
+        {
+            var index = orders.FindIndex(o => o.OrderId == updatedOrder.OrderId);
+            if (index != -1)
+                orders[index] = updatedOrder;
+
+            orderStatusMessage = $"Order #{updatedOrder.OrderId} status updated to {updatedOrder.Status}.";
+            selectedOrderId = null;
+            selectedOrderStatus = null;
+        }
+        else
+        {
+            orderStatusMessage = "Error updating order status. Please try again.";
+        }
     }
 
-    var updateDto = new OrderUpdateStatusDto
-    {
-        OrderId = selectedOrderId.Value,
-        Status = selectedOrderStatus.Value
-    };
-
-    var updatedOrder = await OrderService.UpdateOrderStatusAsync(updateDto);
-
-    if (updatedOrder != null)
-    {
-        // Uppdatera lokalt i listan
-        var index = orders.FindIndex(o => o.OrderId == updatedOrder.OrderId);
-        if (index != -1)
-            orders[index] = updatedOrder;
-
-        orderStatusMessage = $"Order #{updatedOrder.OrderId} status updated to {updatedOrder.Status}.";
-        selectedOrderId = null;
-        selectedOrderStatus = null;
-    }
-    else
-    {
-        orderStatusMessage = "Error updating order status. Please try again.";
-    }
-}
-
+    /// <summary>
+    /// Register an inbound stock entry for a given SKU.
+    /// </summary>
     private async Task RegisterInbound()
     {
         inboundMessage = string.Empty;
@@ -400,7 +422,7 @@
 
         try
         {
-            var updatedArticle = await InboundService.RegisterInboundAsync(inboundSku, inboundQuantity);
+            var updatedArticle = await InboundRoute.RegisterInboundAsync(inboundSku, inboundQuantity);
 
             if (updatedArticle is null)
             {

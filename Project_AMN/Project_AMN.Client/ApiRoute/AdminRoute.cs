@@ -1,19 +1,19 @@
 using System.Net.Http.Json;
 using Project_AMN.Shared.DTO;
 
-namespace Project_AMN.Client.Services;
+namespace Project_AMN.Client.ApiRoutes;
 
 /// <summary>
 /// Provides administrative functions for managing users via HTTP API.
 /// </summary>
-public class AdminService
+public class AdminRoute
 {
     private readonly HttpClient _http;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AdminService"/> class.
+    /// Initializes a new instance of the <see cref="AdminRoute"/> class.
     /// </summary>
-    public AdminService(HttpClient http)
+    public AdminRoute(HttpClient http)
     {
         _http = http;
     }

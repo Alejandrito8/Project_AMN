@@ -1,9 +1,9 @@
 ﻿@page "/adminpanel"
 
 @using Microsoft.AspNetCore.Authorization
-@using Project_AMN.Client.Services
+@using Project_AMN.Client.ApiRoutes
 @using Project_AMN.Shared.DTO
-@inject AdminService AdminService
+@inject AdminRoute AdminRoute
 
 @attribute [Authorize]
 
@@ -82,38 +82,15 @@
 }
 
 @code {
-    /// <summary>
-    /// List of all users.
-    /// </summary>
     private List<UserDto> users = new();
-
-    /// <summary>
-    /// DTO for creating a new user.
-    /// </summary>
     private CreateUserDto newUser = new() { Role = "User" };
-
-    /// <summary>
-    /// DTO for editing an existing user.
-    /// </summary>
     private UpdateUserDto? editingUser;
-
-    /// <summary>
-    /// Password confirmation field for new user creation.
-    /// </summary>
     private string confirmPassword = "";
-
-    /// <summary>
-    /// Id of the user currently being edited.
-    /// </summary>
     private string? editingUserId;
-
-    /// <summary>
-    /// Selected role when editing a user.
-    /// </summary>
     private string selectedRole = "User";
 
     /// <summary>
-    /// Component initialization: fetch all users.
+    /// Initialize component by loading all users.
     /// </summary>
     protected override async Task OnInitializedAsync()
     {
@@ -121,22 +98,22 @@
     }
 
     /// <summary>
-    /// Retrieves all users via AdminService.
+    /// Fetch all users from API.
     /// </summary>
     private async Task GetAllUsers()
     {
-        users = await AdminService.GetAllUsersAsync();
+        users = await AdminRoute.GetAllUsersAsync();
     }
 
     /// <summary>
-    /// Creates a new user using AdminService.
+    /// Create a new user if passwords match.
     /// </summary>
     private async Task CreateUser()
     {
         if (newUser.Password != confirmPassword)
             return;
 
-        var createdUser = await AdminService.CreateUserAsync(newUser);
+        var createdUser = await AdminRoute.CreateUserAsync(newUser);
 
         if (createdUser is not null)
         {
@@ -147,7 +124,7 @@
     }
 
     /// <summary>
-    /// Sets up the editingUser object for editing a specific user.
+    /// Prepare a user for editing.
     /// </summary>
     private void EditUser(UserDto user)
     {
@@ -164,12 +141,12 @@
     }
 
     /// <summary>
-    /// Cancels editing a user.
+    /// Cancel user editing.
     /// </summary>
     private void CancelEdit() => editingUser = null;
 
     /// <summary>
-    /// Saves the changes made to a user via AdminService.
+    /// Save changes to a user.
     /// </summary>
     private async Task SaveEdit()
     {
@@ -178,7 +155,7 @@
 
         editingUser.Roles = new List<string> { selectedRole };
 
-        var updatedUser = await AdminService.UpdateUserAsync(editingUserId, editingUser);
+        var updatedUser = await AdminRoute.UpdateUserAsync(editingUserId, editingUser);
 
         if (updatedUser is not null)
         {
@@ -194,11 +171,11 @@
     }
 
     /// <summary>
-    /// Deletes a user by Id using AdminService.
+    /// Delete a user by Id.
     /// </summary>
     private async Task DeleteUser(string userId)
     {
-        var success = await AdminService.DeleteUserAsync(userId);
+        var success = await AdminRoute.DeleteUserAsync(userId);
         if (success)
         {
             users.RemoveAll(u => u.Id == userId);
@@ -206,7 +183,7 @@
     }
 
     /// <summary>
-    /// Returns the text for the create button based on the selected role.
+    /// Get button text for user creation.
     /// </summary>
     private string GetCreateButtonText()
     {
