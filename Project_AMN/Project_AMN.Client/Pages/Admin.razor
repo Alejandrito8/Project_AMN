@@ -128,11 +128,45 @@
             <select @bind="orderStatusFilter" class="border p-2 w-full rounded">
                 <option value="">All Statuses</option>
                 <option value="Created">Created</option>
+                <option value="Sent">Sent</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
                 <option value="Completed">Completed</option>
-                <option value="Sent"></option>
-                <option value="Canceled">Canceled</option>
             </select>
         </div>
+<!-- UPDATE ORDER STATUS -->
+<div class="mb-4">
+    <h4 class="font-semibold mb-2">Update Order Status</h4>
+
+    <div class="flex gap-2">
+        <select @bind="selectedOrderId" class="border p-2 rounded flex-1">
+            <option value="">Select Order</option>
+            @foreach (var order in orders)
+            {
+                <option value="@order.OrderId">Order #@order.OrderId | Current: @order.Status</option>
+            }
+        </select>
+
+        <select @bind="selectedOrderStatus" class="border p-2 rounded flex-1">
+            <option value="">Select New Status</option>
+            @foreach (OrderStatus status in Enum.GetValues(typeof(OrderStatus)))
+            {
+                <option value="@status">@status</option>
+            }
+        </select>
+
+        <button class="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded"
+                @onclick="UpdateOrderStatus">
+            Update
+        </button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(orderStatusMessage))
+    {
+        <p class="text-green-600 mt-2">@orderStatusMessage</p>
+    }
+</div>
+
 
         @if (orders == null || !orders.Any())
         {
@@ -192,6 +226,9 @@
         );
 
     // ORDERS
+    private int? selectedOrderId;
+    private OrderStatus? selectedOrderStatus;
+    private string orderStatusMessage = string.Empty;
     private List<OrderResultDto> orders = new();
     private string orderSearchText = string.Empty;
     private string orderStatusFilter = string.Empty;
@@ -250,7 +287,6 @@
         await LoadArticlesAsync();
         newArticle = new ArticleCreateDto();
     }
-
     private string GenerateUniqueSku()
     {
         string sku;
@@ -317,6 +353,40 @@
             CancelEditArticle();
         }
     }
+    private async Task UpdateOrderStatus()
+{
+    orderStatusMessage = string.Empty;
+
+    if (selectedOrderId == null || selectedOrderStatus == null)
+    {
+        orderStatusMessage = "Please select an order and a status.";
+        return;
+    }
+
+    var updateDto = new OrderUpdateStatusDto
+    {
+        OrderId = selectedOrderId.Value,
+        Status = selectedOrderStatus.Value
+    };
+
+    var updatedOrder = await OrderService.UpdateOrderStatusAsync(updateDto);
+
+    if (updatedOrder != null)
+    {
+        // Uppdatera lokalt i listan
+        var index = orders.FindIndex(o => o.OrderId == updatedOrder.OrderId);
+        if (index != -1)
+            orders[index] = updatedOrder;
+
+        orderStatusMessage = $"Order #{updatedOrder.OrderId} status updated to {updatedOrder.Status}.";
+        selectedOrderId = null;
+        selectedOrderStatus = null;
+    }
+    else
+    {
+        orderStatusMessage = "Error updating order status. Please try again.";
+    }
+}
 
     private async Task RegisterInbound()
     {
