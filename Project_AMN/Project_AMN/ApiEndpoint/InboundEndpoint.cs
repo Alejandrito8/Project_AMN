@@ -13,7 +13,7 @@ public static class InboundEndpoints
         /// <summary>
         /// Updates the stock quantity of an article by SKU (inbound operation).
         /// </summary>
-        app.MapPut("/api/inbound/{sku}", async (string sku, int quantity, IMediator mediator) =>
+        app.MapPut("api/inbound/{sku}", async (string sku, int quantity, IMediator mediator) =>
         {
             var command = new InboundArticleCommand(sku, quantity);
             var updated = await mediator.Send(command);

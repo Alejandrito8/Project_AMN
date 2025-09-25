@@ -23,7 +23,7 @@ public class OrderRoute
     /// </summary>
     public async Task<List<OrderResultDto?>> GetAllOrdersAsync()
     {
-        var orders = await _http.GetFromJsonAsync<List<OrderResultDto?>>("/api/orders");
+        var orders = await _http.GetFromJsonAsync<List<OrderResultDto?>>("http://localhost:5000/api/orders");
         return orders ?? new List<OrderResultDto?>();
     }
 
@@ -32,7 +32,7 @@ public class OrderRoute
     /// </summary>
     public async Task<OrderResultDto?> CreateOrderAsync(OrderCreateDto dto)
     {
-        var response = await _http.PostAsJsonAsync("/api/orders", dto);
+        var response = await _http.PostAsJsonAsync("http://localhost:5000/api/orders", dto);
 
         if (response.IsSuccessStatusCode)
         {
@@ -49,7 +49,7 @@ public class OrderRoute
     /// </summary>
     public async Task<OrderResultDto?> UpdateOrderStatusAsync(OrderUpdateStatusDto dto)
     {
-        var response = await _http.PutAsJsonAsync($"/api/orders/{dto.OrderId}/status", dto);
+        var response = await _http.PutAsJsonAsync($"http://localhost:5000/api/orders/{dto.OrderId}/status", dto);
         if (response.IsSuccessStatusCode)
         {
             return await response.Content.ReadFromJsonAsync<OrderResultDto?>();
@@ -64,7 +64,7 @@ public class OrderRoute
     /// </summary>
     public async Task<bool> DeleteOrderAsync(int id)
     {
-        var response = await _http.DeleteAsync($"/api/orders/{id}");
+        var response = await _http.DeleteAsync($"api/orders/{id}");
         return response.IsSuccessStatusCode;
     }
 
@@ -90,7 +90,7 @@ public class OrderRoute
     /// </summary>
     public async Task<byte[]> ExportOrdersAsync()
     {
-        var response = await _http.GetAsync("/orders/export");
+        var response = await _http.GetAsync("orders/export");
         if (response.IsSuccessStatusCode)
             return await response.Content.ReadAsByteArrayAsync();
 

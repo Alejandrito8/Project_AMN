@@ -1,4 +1,7 @@
 @page "/commerceAdmin"
+@* @attribute [Authorize(Roles = "Admin")] *@
+@rendermode InteractiveWebAssembly
+
 @using Microsoft.AspNetCore.Authorization
 @using Project_AMN.Client.ApiRoutes
 @using Project_AMN.Shared.DTO

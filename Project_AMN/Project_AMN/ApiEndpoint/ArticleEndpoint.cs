@@ -13,16 +13,15 @@ public static class ArticleEndpoints
         /// <summary>
         /// Retrieves a list of all articles.
         /// </summary>
-        app.MapGet("/api/articles", async (IMediator mediator) =>
+        app.MapGet("api/articles", async (IMediator mediator) =>
         {
             var articles = await mediator.Send(new ListArticleQuery());
             return Results.Ok(articles);
         });
-
         /// <summary>
         /// Creates a new article.
         /// </summary>
-        app.MapPost("/api/articles", async (CreateArticleCommand articleCommand, IMediator mediator) =>
+        app.MapPost("api/articles", async (CreateArticleCommand articleCommand, IMediator mediator) =>
         {
             var article = await mediator.Send(articleCommand);
             return article is null ? Results.NotFound() : Results.Ok(article);
@@ -31,7 +30,7 @@ public static class ArticleEndpoints
         /// <summary>
         /// Updates an existing article by SKU.
         /// </summary>
-        app.MapPut("/api/articles/{sku}", async (
+        app.MapPut("api/articles/{sku}", async (
             string sku,
             ArticleUpdateDto dto,
             IMediator mediator) =>
@@ -47,7 +46,7 @@ public static class ArticleEndpoints
         /// <summary>
         /// Deletes an existing article by ID.
         /// </summary>
-        app.MapDelete("/api/articles/{id:int}", async (int Id, IMediator mediator) =>
+        app.MapDelete("api/articles/{id:int}", async (int Id, IMediator mediator) =>
         {
             var deleted = await mediator.Send(new DeleteArticleCommand(Id));
             return deleted

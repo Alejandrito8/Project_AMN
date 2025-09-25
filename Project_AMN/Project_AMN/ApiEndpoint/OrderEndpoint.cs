@@ -13,13 +13,13 @@ public static class OrderEndpoints
         /// <summary>
         /// Retrieves a list of all orders.
         /// </summary>
-        app.MapGet("/api/orders", async (IOrderService service) =>
+        app.MapGet("api/orders", async (IOrderService service) =>
             Results.Ok(await service.GetAllOrdersAsync()));
 
         /// <summary>
         /// Retrieves a single order by ID.
         /// </summary>
-        app.MapGet("/api/orders/{orderId}", async (int orderId, IOrderService service) =>
+        app.MapGet("api/orders/{orderId}", async (int orderId, IOrderService service) =>
         {
             var order = await service.GetOrderByIdAsync(orderId);
             return order is null ? Results.NotFound() : Results.Ok(order);
@@ -34,7 +34,7 @@ public static class OrderEndpoints
         /// <summary>
         /// Updates the status of an existing order.
         /// </summary>
-        app.MapPut("/api/orders/{orderId}/status", async (int orderId, OrderUpdateStatusDto dto, IOrderService service) =>
+        app.MapPut("api/orders/{orderId}/status", async (int orderId, OrderUpdateStatusDto dto, IOrderService service) =>
         {
             dto.OrderId = orderId; // säkerställ att ID matchar route
             var updated = await service.UpdateOrderStatusAsync(dto);
@@ -44,7 +44,7 @@ public static class OrderEndpoints
         /// <summary>
         /// Deletes an existing order by ID.
         /// </summary>
-        app.MapDelete("/api/orders/{orderId}", async (int orderId, IOrderService service) =>
+        app.MapDelete("api/orders/{orderId}", async (int orderId, IOrderService service) =>
         {
             var deleted = await service.DeleteOrderAsync(orderId);
             return deleted ? Results.NoContent() : Results.NotFound();
@@ -53,7 +53,7 @@ public static class OrderEndpoints
         /// <summary>
         /// Adds a new item to an order.
         /// </summary>
-        app.MapPost("/api/orders/{orderId}/items", async (int orderId, OrderItemCreateDto dto, IOrderService service) =>
+        app.MapPost("api/orders/{orderId}/items", async (int orderId, OrderItemCreateDto dto, IOrderService service) =>
         {
             var addedItem = await service.AddItemToOrderAsync(orderId, dto.ArticleId, dto.Quantity, dto.OrderPrice);
             return addedItem is null ? Results.NotFound() : Results.Ok(addedItem);
@@ -62,7 +62,7 @@ public static class OrderEndpoints
         /// <summary>
         /// Retrieves all items of a specific order.
         /// </summary>
-        app.MapGet("/api/orders/{orderId}/items", async (int orderId, IOrderService service) =>
+        app.MapGet("api/orders/{orderId}/items", async (int orderId, IOrderService service) =>
         {
             var items = await service.GetOrderItemsAsync(orderId);
             return items.Any() ? Results.Ok(items) : Results.NotFound();
@@ -71,7 +71,7 @@ public static class OrderEndpoints
         /// <summary>
         /// Searches for orders based on status and date range.
         /// </summary>
-        app.MapGet("/api/orders/search", async ([AsParameters] OrderSearchRequest request, IOrderService service) =>
+        app.MapGet("api/orders/search", async ([AsParameters] OrderSearchRequest request, IOrderService service) =>
         {
             OrderStatus? status = null;
 
@@ -88,7 +88,7 @@ public static class OrderEndpoints
         /// <summary>
         /// Exports all orders to a CSV file.
         /// </summary>
-        app.MapGet("/api/orders/export", async (HttpResponse response, ApplicationDbContext db) =>
+        app.MapGet("api/orders/export", async (HttpResponse response, ApplicationDbContext db) =>
         {
             var orders = await db.Orders.Include(o => o.Items).ThenInclude(i => i.Article).ToListAsync();
             var fileBytes = ExportService.ExportOrders(orders);

@@ -47,6 +47,12 @@ builder.Services.AddScoped<IArticleService, ArticleService>();
 builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+
+builder.Services.AddScoped<Project_AMN.Client.ApiRoutes.AdminRoute>();
+builder.Services.AddScoped<Project_AMN.Client.ApiRoutes.OrderRoute>();
+builder.Services.AddScoped<Project_AMN.Client.ApiRoutes.InboundRoute>();
+builder.Services.AddScoped<Project_AMN.Client.ApiRoutes.ArticleRoute>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -96,7 +102,7 @@ async Task InitializeRolesAndAdmin(WebApplication app)
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-    var roles = new[] { "Admin", "User" };
+    var roles = new[] { "Admin", "User", "Employe" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))

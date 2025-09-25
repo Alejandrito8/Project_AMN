@@ -13,7 +13,7 @@ public static class AdminEndpoints
         /// <summary>
         /// Creates a new user.
         /// </summary>
-        app.MapPost("/api/admin/users", async (CreateUserDto dto, IMediator mediator) =>
+        app.MapPost("api/admin/users", async (CreateUserDto dto, IMediator mediator) =>
         {
             var command = new CreateUserCommand(dto);
             var user = await mediator.Send(command);
@@ -24,7 +24,7 @@ public static class AdminEndpoints
         /// <summary>
         /// Retrieves a list of all users.
         /// </summary>
-        app.MapGet("/api/admin/users", async (IMediator mediator) =>
+        app.MapGet("api/admin/users", async (IMediator mediator) =>
         {
             var users = await mediator.Send(new ListUsersQuery());
             return Results.Ok(users);
@@ -34,7 +34,7 @@ public static class AdminEndpoints
         /// <summary>
         /// Updates an existing user by ID.
         /// </summary>
-        app.MapPut("/api/admin/users/{id}", async (string id, UpdateUserDto dto, IMediator mediator) =>
+        app.MapPut("api/admin/users/{id}", async (string id, UpdateUserDto dto, IMediator mediator) =>
         {
             var command = new UpdateUserCommand(id, dto);
             var updated = await mediator.Send(command);
@@ -45,7 +45,7 @@ public static class AdminEndpoints
         /// <summary>
         /// Deletes an existing user by ID.
         /// </summary>
-        app.MapDelete("/api/admin/users/{id}", async (string id, IMediator mediator) =>
+        app.MapDelete("api/admin/users/{id}", async (string id, IMediator mediator) =>
         {
             var deleted = await mediator.Send(new DeleteUserCommand(id));
             return deleted ? Results.NoContent() : Results.NotFound($"User with ID {id} not found.");
