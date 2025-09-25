@@ -73,53 +73,48 @@ public class OrderService : IOrderService
     /// <summary>
     /// Creates a new order.
     /// </summary>
-public async Task<OrderResultDto> CreateOrderAsync(OrderCreateDto dto)
-{
-    if (dto.Items == null || !dto.Items.Any())
-        throw new ArgumentException("Order must contain at least one item.", nameof(dto.Items));
-
-    // Skapa order
-    var order = new Order
+    public async Task<OrderResultDto> CreateOrderAsync(OrderCreateDto dto)
     {
-        CreatedAt = DateTime.UtcNow,
-        Status = OrderStatus.Created,
-        TotalAmount = dto.TotalAmount,
-        ShippingAddress = dto.ShippingAddress
-    };
+        if (dto.Items == null || !dto.Items.Any())
+            throw new ArgumentException("Order must contain at least one item.", nameof(dto.Items));
 
-    _context.Orders.Add(order);
-    await _context.SaveChangesAsync();
-
-    // Lägg till order items och uppdatera stock
-    foreach (var itemDto in dto.Items)
-    {
-        var article = await _context.Articles.FindAsync(itemDto.ArticleId);
-        if (article == null)
-            throw new InvalidOperationException($"Article with ID {itemDto.ArticleId} not found.");
-
-        if (article.Stock < itemDto.Quantity)
-            throw new InvalidOperationException($"Not enough stock for article '{article.Name}'.");
-
-        // Minska stock
-        article.Stock -= itemDto.Quantity;
-
-        var orderItem = new OrderItem
+        var order = new Order
         {
-            OrderId = order.OrderId,
-            ArticleId = itemDto.ArticleId,
-            Quantity = itemDto.Quantity,
-            OrderPrice = itemDto.OrderPrice
+            CreatedAt = DateTime.UtcNow,
+            Status = OrderStatus.Created,
+            TotalAmount = dto.TotalAmount,
+            ShippingAddress = dto.ShippingAddress
         };
 
-        _context.OrderItems.Add(orderItem);
+        _context.Orders.Add(order);
+        await _context.SaveChangesAsync();
+
+        foreach (var itemDto in dto.Items)
+        {
+            var article = await _context.Articles.FindAsync(itemDto.ArticleId);
+            if (article == null)
+                throw new InvalidOperationException($"Article with ID {itemDto.ArticleId} not found.");
+
+            if (article.Stock < itemDto.Quantity)
+                throw new InvalidOperationException($"Not enough stock for article '{article.Name}'.");
+
+            article.Stock -= itemDto.Quantity;
+
+            var orderItem = new OrderItem
+            {
+                OrderId = order.OrderId,
+                ArticleId = itemDto.ArticleId,
+                Quantity = itemDto.Quantity,
+                OrderPrice = itemDto.OrderPrice
+            };
+
+            _context.OrderItems.Add(orderItem);
+        }
+
+        await _context.SaveChangesAsync();
+
+        return await GetOrderByIdAsync(order.OrderId);
     }
-
-    // Spara både order items och uppdaterad stock i samma transaktion
-    await _context.SaveChangesAsync();
-
-    // Hämta order med items för retur
-    return await GetOrderByIdAsync(order.OrderId);
-}
 
 
     /// <summary>

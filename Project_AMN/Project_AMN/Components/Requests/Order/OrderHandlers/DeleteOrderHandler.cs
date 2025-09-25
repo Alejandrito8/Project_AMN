@@ -1,4 +1,3 @@
-
 namespace Project_AMN.Handler;
 
 public class DeleteOrderHandler : IRequestHandler<DeleteOrderCommand, bool>
@@ -15,9 +14,3 @@ public class DeleteOrderHandler : IRequestHandler<DeleteOrderCommand, bool>
         return await _orderService.DeleteOrderAsync(request.OrderId);
     }
 }
-
-
-
-
-
-

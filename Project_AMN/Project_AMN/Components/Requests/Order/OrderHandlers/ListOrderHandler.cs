@@ -1,4 +1,3 @@
-
 namespace Project_AMN.Handler;
 
 public class ListOrderHandler : IRequestHandler<ListOrderQuery, IEnumerable<OrderResultDto>>

@@ -11,9 +11,4 @@ public interface IInboundService
     /// </summary>
     Task<bool> RegisterInboundAsync(string sku, int quantity);
     
-}  
-
-
-
-
-
+} 

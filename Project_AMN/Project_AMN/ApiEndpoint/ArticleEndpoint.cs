@@ -18,7 +18,6 @@ public static class ArticleEndpoints
             var articles = await mediator.Send(new ListArticleQuery());
             return Results.Ok(articles);
         });
-        
         /// <summary>
         /// Creates a new article.
         /// </summary>

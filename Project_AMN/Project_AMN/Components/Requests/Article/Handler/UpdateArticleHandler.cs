@@ -1,4 +1,3 @@
-
 namespace Project_AMN.Handler;
 
 public class UpdateArticleHandler : IRequestHandler<UpdateArticleCommand, ArticleResultDto>
@@ -16,6 +15,4 @@ public class UpdateArticleHandler : IRequestHandler<UpdateArticleCommand, Articl
         return result;
 
     }
-
-
 }

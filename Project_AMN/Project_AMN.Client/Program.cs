@@ -20,4 +20,3 @@ builder.Services.AddScoped<OrderRoute>();
 builder.Services.AddScoped<InboundRoute>();
 
 await builder.Build().RunAsync();
-

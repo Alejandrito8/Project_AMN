@@ -7,7 +7,6 @@
 @inject ArticleRoute ArticleRoute
 
 <h3 class="mb-4">Create Your Order</h3>
-
 <h4 class="mb-3">Available Articles</h4>
 
 <div class="mb-3 d-flex gap-2">
@@ -72,7 +71,7 @@
                 {
                     <tr>
                         <td>@item.Article.Name</td>
-                        <td>@(item.Article.Price * item.Quantity) kr</td>
+                        <td>@(item.Article.Price* item.Quantity) kr</td>
                         <td>
                             <div class="d-flex gap-1">
                                 <button class="btn btn-sm btn-secondary" style="width:40px;"
@@ -231,13 +230,13 @@ else
     }
 
     private IEnumerable<ArticleResultDto> FilteredArticles =>
-        articles.Where(a =>
-            (string.IsNullOrWhiteSpace(searchText) ||
-             a.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-             a.SKU.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-             a.Location.Contains(searchText, StringComparison.OrdinalIgnoreCase)) &&
-            (string.IsNullOrWhiteSpace(stockFilter) ||
-             (stockFilter == "in" && a.Stock > 0) ||
-             (stockFilter == "out" && a.Stock == 0))
-        );
+    articles.Where(a =>
+    (string.IsNullOrWhiteSpace(searchText) ||
+    a.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+    a.SKU.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+    a.Location.Contains(searchText, StringComparison.OrdinalIgnoreCase)) &&
+    (string.IsNullOrWhiteSpace(stockFilter) ||
+    (stockFilter == "in" && a.Stock > 0) ||
+    (stockFilter == "out" && a.Stock == 0))
+    );
 }
