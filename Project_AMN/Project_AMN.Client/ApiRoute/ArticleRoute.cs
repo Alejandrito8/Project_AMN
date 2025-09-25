@@ -24,25 +24,16 @@ public class ArticleRoute
     /// </summary>
     public async Task<List<ArticleResultDto?>> GetAllArticlesAsync()
     {
-        var articles = await _http.GetFromJsonAsync<List<ArticleResultDto?>>("/api/articles");
+        var articles = await _http.GetFromJsonAsync<List<ArticleResultDto?>>("http://localhost:5000/api/articles");
         return articles ?? new List<ArticleResultDto?>();
     }
-
-    // /// <summary>
-    // /// Retrieves an article by its ID.
-    // /// </summary>
-    // public async Task<ArticleResultDto?> GetArticleByIdAsync(int id)
-    // {
-    //     var article = await _http.GetFromJsonAsync<ArticleResultDto?>($"/api/articles/{id}");
-    //     return article;
-    // }
 
     /// <summary>
     /// Creates a new article via the API.
     /// </summary>
     public async Task<ArticleResultDto?> CreateArticleAsync(ArticleCreateDto dto)
     {
-        var response = await _http.PostAsJsonAsync("/api/articles", dto);
+        var response = await _http.PostAsJsonAsync("http://localhost:5000/api/articles", dto);
 
         if (response.IsSuccessStatusCode)
         {
@@ -59,7 +50,7 @@ public class ArticleRoute
     /// </summary>
     public async Task<ArticleResultDto?> UpdateArticleAsync(ArticleUpdateDto dto, string sku)
     {
-        var response = await _http.PutAsJsonAsync($"/api/articles/{sku}", dto);
+        var response = await _http.PutAsJsonAsync($"http://localhost:5000/api/articles/{sku}", dto);
 
         if (response.IsSuccessStatusCode)
         {
@@ -76,7 +67,7 @@ public class ArticleRoute
     /// </summary>
     public async Task<bool> DeleteArticleAsync(int id)
     {
-        var response = await _http.DeleteAsync($"/api/articles/{id}");
+        var response = await _http.DeleteAsync($"http://localhost:5000/api/articles/{id}");
         return response.IsSuccessStatusCode;
     }
 
@@ -85,7 +76,7 @@ public class ArticleRoute
     /// </summary>
     public async Task<List<ArticleResultDto?>> SearchArticlesAsync(QueryFilter filter)
     {
-        var response = await _http.PostAsJsonAsync("/api/articles/search", filter);
+        var response = await _http.PostAsJsonAsync("http://localhost:5000/api/articles/search", filter);
 
         if (response.IsSuccessStatusCode)
         {
@@ -103,7 +94,7 @@ public class ArticleRoute
     /// </summary>
     public async Task<byte[]> ExportArticlesAsync()
     {
-        var response = await _http.GetAsync("/articles/export");
+        var response = await _http.GetAsync("http://localhost:5000/articles/export");
         if (response.IsSuccessStatusCode)
             return await response.Content.ReadAsByteArrayAsync();
 

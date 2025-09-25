@@ -1,5 +1,9 @@
 using System.Net.Http.Json;
 using Project_AMN.Shared.DTO;
+using System.Text.Json;    
+using System.Net.Http;       
+
+
 
 namespace Project_AMN.Client.ApiRoutes;
 
@@ -21,29 +25,29 @@ public class AdminRoute
     /// <summary>
     /// Retrieves all users from the admin API.
     /// </summary>
-    public async Task<List<UserDto>> GetAllUsersAsync()
-    {
-        var response = await _http.GetAsync("/api/admin/users");
-        if (response.IsSuccessStatusCode)
+public async Task<List<UserDto>> GetAllUsersAsync()
+{
+    var response = await _http.GetAsync("http://localhost:5000/api/admin/users");
+    
+
+    if (!response.IsSuccessStatusCode)
         {
-            return await response.Content.ReadFromJsonAsync<List<UserDto>>() ?? new List<UserDto>();
-        }
-        else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-        {
+            var content = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"API returned {response.StatusCode}");
+            Console.WriteLine($"Response content: {content}");
             return new List<UserDto>();
         }
 
-        var error = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"Error with retrieving Users: {error}");
-        return new List<UserDto>();
-    }
+    return await response.Content.ReadFromJsonAsync<List<UserDto>>() ?? new List<UserDto>();
+}
+
 
     /// <summary>
     /// Creates a new user via the admin API.
     /// </summary>
     public async Task<UserDto?> CreateUserAsync(CreateUserDto dto)
     {
-        var response = await _http.PostAsJsonAsync("/api/admin/users", dto);
+        var response = await _http.PostAsJsonAsync("http://localhost:5000/api/admin/users", dto);
 
         if (response.IsSuccessStatusCode)
         {
@@ -60,7 +64,7 @@ public class AdminRoute
     /// </summary>
     public async Task<UserDto?> UpdateUserAsync(string id, UpdateUserDto dto)
     {
-        var response = await _http.PutAsJsonAsync($"/api/admin/users/{id}", dto);
+        var response = await _http.PutAsJsonAsync($"http://localhost:5000/api/admin/users/{id}", dto);
 
         if (response.IsSuccessStatusCode)
         {
@@ -77,7 +81,7 @@ public class AdminRoute
     /// </summary>
     public async Task<bool> DeleteUserAsync(string id)
     {
-        var response = await _http.DeleteAsync($"/api/admin/users/{id}");
+        var response = await _http.DeleteAsync($"http://localhost:5000/api/admin/users/{id}");
 
         if (response.IsSuccessStatusCode)
         {

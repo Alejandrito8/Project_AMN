@@ -1,11 +1,10 @@
 ﻿@page "/adminpanel"
-
+@* @attribute [Authorize(Roles = "Admin")] *@
+@rendermode InteractiveWebAssembly
 @using Microsoft.AspNetCore.Authorization
 @using Project_AMN.Client.ApiRoutes
 @using Project_AMN.Shared.DTO
 @inject AdminRoute AdminRoute
-
-@attribute [Authorize]
 
 <PageTitle>Admin Panel</PageTitle>
 <h1 class="text-center">Admin Panel</h1>
