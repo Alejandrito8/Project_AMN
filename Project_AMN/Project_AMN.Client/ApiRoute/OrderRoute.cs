@@ -64,7 +64,7 @@ public class OrderRoute
     /// </summary>
     public async Task<bool> DeleteOrderAsync(int id)
     {
-        var response = await _http.DeleteAsync($"api/orders/{id}");
+        var response = await _http.DeleteAsync($"http://localhost:5000/api/orders/{id}");
         return response.IsSuccessStatusCode;
     }
 
@@ -90,7 +90,7 @@ public class OrderRoute
     /// </summary>
     public async Task<byte[]> ExportOrdersAsync()
     {
-        var response = await _http.GetAsync("orders/export");
+        var response = await _http.GetAsync("http://localhost:5000orders/export");
         if (response.IsSuccessStatusCode)
             return await response.Content.ReadAsByteArrayAsync();
 
