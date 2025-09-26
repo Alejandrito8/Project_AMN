@@ -14,14 +14,15 @@ public interface IUserService
     /// Retrieves all users.
     /// </summary>
     Task<IReadOnlyList<UserDto>> GetAllUsersAsync();
-
-    // /// <summary>
-    // /// Deletes a user by ID.
-    // /// </summary>
-    // Task<bool> DeleteUserAsync(string id);
-
+    
     /// <summary>
     /// Updates an existing user.
     /// </summary>
-    Task<UserDto?> UpdateUserAsync(string Id, UpdateUserDto dto);
+    Task<UserDto?> UpdateUserAsync(string id, UpdateUserDto dto);
+
+    /// <summary>
+    /// Deletes a user by ID.
+    /// </summary>
+    Task<bool> DeleteUserAsync(string id);
+
 }

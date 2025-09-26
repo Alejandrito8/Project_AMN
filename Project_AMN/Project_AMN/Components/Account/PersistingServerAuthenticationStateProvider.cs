@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
@@ -57,7 +58,10 @@ internal sealed class PersistingServerAuthenticationStateProvider : ServerAuthen
                 {
                     UserId = userId,
                     Email = email,
+                    Roles = principal.FindAll(ClaimTypes.Role).Select(r => r.Value).ToList(),
+                    DisplayName = principal.Identity?.Name ?? email
                 });
+
             }
         }
     }

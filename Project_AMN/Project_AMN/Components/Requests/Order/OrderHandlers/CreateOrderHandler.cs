@@ -1,8 +1,5 @@
 namespace Project_AMN.Handler;
 
-/// <summary>
-/// Handles creation of a new order.
-/// </summary>
 public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderResultDto?>
 {
     private readonly IOrderService _orderService;

@@ -34,5 +34,10 @@ public interface IArticleService
     /// </summary>
     Task<bool> DeleteArticleAsync(int id);
 
+/// <summary>
+/// Search article function
+/// </summary>
+/// <param name="filter"></param>
+/// <returns></returns>
     Task<IEnumerable<ArticleResultDto>> SearchArticlesAsync(QueryFilter filter);
 };

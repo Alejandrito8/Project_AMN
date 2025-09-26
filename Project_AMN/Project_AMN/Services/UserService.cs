@@ -77,6 +77,21 @@ public class UserService : IUserService
 
         return list;
     }
+    /// <summary>
+    /// Deletes a user by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public async Task<bool> DeleteUserAsync(string id)
+    {
+        var user = await _userManager.FindByIdAsync(id);
+        if (user == null)
+            return false;
+
+        var result = await _userManager.DeleteAsync(user);
+
+        return result.Succeeded;
+    }
 
     /// <summary>
     /// Updates an existing user and their roles.
@@ -121,4 +136,5 @@ public class UserService : IUserService
             Roles = (await _userManager.GetRolesAsync(user)).ToList()
         };
     }
+
 }

@@ -1,4 +1,4 @@
-namespace Project_AMN.Handlers;
+namespace Project_AMN.Handler;
 public class CreateUserHandler : IRequestHandler<CreateUserCommand, UserDto?>
 {
     private readonly IUserService _userService;
@@ -9,6 +9,6 @@ public class CreateUserHandler : IRequestHandler<CreateUserCommand, UserDto?>
 
     public async Task<UserDto?> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        return await _userService.CreateUserAsync(request.UserDto);
+        return await _userService.CreateUserAsync(request.Dto);
     }
 }
