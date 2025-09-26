@@ -154,12 +154,11 @@ namespace Project_AMN.Services
                 );
             }
 
-            // 📄 Pagination (default to 1 if Page not set)
             var page = filter.Page <= 0 ? 1 : filter.Page;
             var pageSize = filter.PageSize <= 0 ? 10 : filter.PageSize;
 
             query = query
-                .OrderBy(a => a.Id) // or Name if you prefer alphabetic sorting
+                .OrderBy(a => a.Id) 
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize);
 

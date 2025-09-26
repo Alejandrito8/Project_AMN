@@ -1,4 +1,4 @@
-namespace Project_AMN.Handlers;
+namespace Project_AMN.Handler;
 public class ListUsersHandler : IRequestHandler<ListUsersQuery, IReadOnlyList<UserDto>>
 {
     private readonly IUserService _userService;

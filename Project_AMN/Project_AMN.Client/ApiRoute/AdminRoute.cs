@@ -1,9 +1,7 @@
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Project_AMN.Shared.DTO;
-using System.Text.Json;    
-using System.Net.Http;       
-
-
 
 namespace Project_AMN.Client.ApiRoutes;
 
@@ -21,16 +19,16 @@ public class AdminRoute
     {
         _http = http;
     }
-
+    
     /// <summary>
     /// Retrieves all users from the admin API.
     /// </summary>
-public async Task<List<UserDto>> GetAllUsersAsync()
-{
-    var response = await _http.GetAsync("http://localhost:5000/api/admin/users");
-    
+    public async Task<List<UserDto>> GetAllUsersAsync()
+    {
+        var response = await _http.GetAsync("http://localhost:5000/api/admin/users");
 
-    if (!response.IsSuccessStatusCode)
+
+        if (!response.IsSuccessStatusCode)
         {
             var content = await response.Content.ReadAsStringAsync();
             Console.WriteLine($"API returned {response.StatusCode}");
@@ -38,8 +36,8 @@ public async Task<List<UserDto>> GetAllUsersAsync()
             return new List<UserDto>();
         }
 
-    return await response.Content.ReadFromJsonAsync<List<UserDto>>() ?? new List<UserDto>();
-}
+        return await response.Content.ReadFromJsonAsync<List<UserDto>>() ?? new List<UserDto>();
+    }
 
 
     /// <summary>
@@ -97,4 +95,5 @@ public async Task<List<UserDto>> GetAllUsersAsync()
         Console.WriteLine($"Error with deleting User: {error}");
         return false;
     }
+
 }

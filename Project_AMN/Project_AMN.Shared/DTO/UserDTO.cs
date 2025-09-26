@@ -93,4 +93,5 @@ namespace Project_AMN.Shared.DTO
         /// </summary>
         public List<string> Roles { get; set; } = new();
     }
+
 };

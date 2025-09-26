@@ -1,5 +1,3 @@
-using Project_AMN.Handlers;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpClient();

@@ -1,8 +1,5 @@
 namespace Project_AMN.Handler;
 
-/// <summary>
-/// Handles updating the status of an existing order.
-/// </summary>
 public class UpdateOrderStatusHandler : IRequestHandler<UpdateOrderStatusCommand, OrderResultDto?>
 {
     private readonly IOrderService _orderService;
